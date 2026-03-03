@@ -31,7 +31,6 @@ const SYSTEM_SIZES = [
 const COST_PER_WATT = 3.0; // $3/W average installed cost in SoCal
 const PEAK_SUN_HOURS = 5.5; // SoCal average
 const SYSTEM_EFFICIENCY = 0.85;
-const ITC_CREDIT = 0.30; // 30% federal investment tax credit
 const ANNUAL_DEGRADATION = 0.005; // 0.5% per year panel degradation
 
 export default function SolarAnalyzer({ result, records, plugin, selectedPlan }: Props) {
@@ -39,7 +38,6 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
   const [systemKw, setSystemKw] = useState(hasSolar ? 4 : 8);
   const [useCustom, setUseCustom] = useState(false);
   const [customKw, setCustomKw] = useState(8);
-  const [includeItc, setIncludeItc] = useState(true);
 
   const activeKw = useCustom ? customKw : systemKw;
 
@@ -100,9 +98,7 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
       totalSavings += selfConsumptionSaving + exportCredit;
     }
 
-    const systemCostGross = activeKw * 1000 * COST_PER_WATT;
-    const itcSavings = includeItc ? systemCostGross * ITC_CREDIT : 0;
-    const systemCostNet = systemCostGross - itcSavings;
+    const systemCost = activeKw * 1000 * COST_PER_WATT;
 
     const annualSavings = result.daysAnalyzed > 0
       ? (totalSavings / result.daysAnalyzed) * 365
@@ -114,8 +110,8 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
       lifetimeSavings += annualSavings * Math.pow(1 - ANNUAL_DEGRADATION, year);
     }
 
-    const paybackYears = annualSavings > 0 ? systemCostNet / annualSavings : Infinity;
-    const roi25Year = systemCostNet > 0 ? ((lifetimeSavings - systemCostNet) / systemCostNet) * 100 : 0;
+    const paybackYears = annualSavings > 0 ? systemCost / annualSavings : Infinity;
+    const roi25Year = systemCost > 0 ? ((lifetimeSavings - systemCost) / systemCost) * 100 : 0;
     const selfConsumptionPct = totalNewGeneration > 0 ? (totalSelfConsumed / totalNewGeneration) * 100 : 0;
     const monthlySavings = annualSavings / 12;
 
@@ -127,16 +123,14 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
       totalSavings,
       annualSavings,
       monthlySavings,
-      systemCostGross,
-      systemCostNet,
-      itcSavings,
+      systemCost,
       paybackYears,
       roi25Year,
       lifetimeSavings,
       selfConsumptionPct,
       dailyKwhPerKw,
     };
-  }, [result, records, plugin, selectedPlan, activeKw, hasSolar, includeItc]);
+  }, [result, records, plugin, selectedPlan, activeKw, hasSolar]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -195,31 +189,19 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
           </div>
         )}
 
-        {/* Options */}
-        <div className="flex items-center gap-6 text-sm">
+        {/* Production estimate */}
+        <div className="text-sm">
           <span className="text-gray-600">
             Estimated production: <strong>{formatKwh(analysis.dailyKwhPerKw * activeKw)}/day</strong>
           </span>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox" checked={includeItc}
-              onChange={(e) => setIncludeItc(e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            <span className="text-gray-600">Include 30% federal tax credit</span>
-          </label>
         </div>
 
         {/* Cost and savings */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
           <div className="rounded-lg border border-yellow-100 p-4">
             <p className="text-sm font-medium text-yellow-600">System Cost</p>
-            <p className="text-2xl font-bold">{formatCurrency(analysis.systemCostNet)}</p>
-            {includeItc && (
-              <p className="text-xs text-gray-500">
-                {formatCurrency(analysis.systemCostGross)} - {formatCurrency(analysis.itcSavings)} ITC
-              </p>
-            )}
+            <p className="text-2xl font-bold">{formatCurrency(analysis.systemCost)}</p>
+            <p className="text-xs text-gray-500">estimated installed</p>
           </div>
           <div className="rounded-lg border border-emerald-100 p-4">
             <p className="text-sm font-medium text-emerald-600">Monthly Savings</p>
@@ -231,15 +213,15 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
             <p className="text-2xl font-bold">
               {analysis.paybackYears === Infinity ? "N/A" : `${analysis.paybackYears.toFixed(1)} yrs`}
             </p>
-            <p className="text-xs text-gray-500">to recover system cost</p>
+            <p className="text-xs text-gray-500">to recover {formatCurrency(analysis.systemCost)}</p>
           </div>
           <div className={`rounded-lg border p-4 ${analysis.roi25Year > 0 ? "border-emerald-100" : "border-red-100"}`}>
             <p className={`text-sm font-medium ${analysis.roi25Year > 0 ? "text-emerald-600" : "text-red-500"}`}>25-Year ROI</p>
             <p className="text-2xl font-bold">{analysis.roi25Year.toFixed(0)}%</p>
             <p className="text-xs text-gray-500">
-              {analysis.lifetimeSavings - analysis.systemCostNet >= 0
-                ? `Net gain: ${formatCurrency(analysis.lifetimeSavings - analysis.systemCostNet)}`
-                : `Net loss: ${formatCurrency(Math.abs(analysis.lifetimeSavings - analysis.systemCostNet))}`}
+              {analysis.lifetimeSavings - analysis.systemCost >= 0
+                ? `Net gain: ${formatCurrency(analysis.lifetimeSavings - analysis.systemCost)}`
+                : `Net loss: ${formatCurrency(Math.abs(analysis.lifetimeSavings - analysis.systemCost))}`}
             </p>
           </div>
         </div>
@@ -266,7 +248,7 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
         </div>
 
         <p className="text-xs text-gray-400 pt-2">
-          Estimates use ${COST_PER_WATT.toFixed(2)}/W installed cost, {PEAK_SUN_HOURS} peak sun hours/day (SoCal avg), {(SYSTEM_EFFICIENCY * 100).toFixed(0)}% system efficiency, and {(ANNUAL_DEGRADATION * 100).toFixed(1)}% annual degradation. New solar installations are on NEM 3.0 (Net Billing Tariff). Actual costs and production vary by location, roof orientation, shading, and installer. Federal ITC is 30% through 2032.
+          Estimates use ${COST_PER_WATT.toFixed(2)}/W installed cost, {PEAK_SUN_HOURS} peak sun hours/day (SoCal avg), {(SYSTEM_EFFICIENCY * 100).toFixed(0)}% system efficiency, and {(ANNUAL_DEGRADATION * 100).toFixed(1)}% annual degradation. New solar installations are on NEM 3.0 (Net Billing Tariff). Actual costs and production vary by location, roof orientation, shading, and installer.
         </p>
       </div>
     </div>
