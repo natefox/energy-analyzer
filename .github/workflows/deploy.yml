@@ -5,16 +5,14 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
+  group: "pages-deploy"
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,16 +30,17 @@ jobs:
         env:
           BASE_PATH: /energy-analyzer
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
+      # Preserve existing PR previews when deploying main
+      - name: Fetch existing previews
+        run: |
+          git fetch origin gh-pages:gh-pages || true
+          if git rev-parse --verify gh-pages >/dev/null 2>&1; then
+            mkdir -p out/pr-preview
+            git checkout gh-pages -- pr-preview/ 2>/dev/null || true
+            cp -r pr-preview/* out/pr-preview/ 2>/dev/null || true
+          fi
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
