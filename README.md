@@ -43,9 +43,21 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 
 ## Running Locally
 
-### Prerequisites
+### Docker (quickest)
 
-- [Node.js](https://nodejs.org/) 18 or later
+```bash
+docker run -p 8080:8080 ghcr.io/natefox/energy-analyzer:main
+```
+
+Open [http://localhost:8080](http://localhost:8080). Or build locally:
+
+```bash
+docker compose up --build
+```
+
+### Node.js
+
+**Prerequisites:** [Node.js](https://nodejs.org/) 18 or later
 
 ### Setup
 
@@ -87,15 +99,7 @@ A GitHub Actions workflow is included at `.github/workflows/deploy.yml`. It auto
 2. Go to **Settings > Pages** and set source to **GitHub Actions**
 3. Push to `main` — the workflow will deploy automatically
 
-**If hosted as a project page** (e.g., `username.github.io/energy-analyzer`), add `basePath` to `next.config.ts`:
-
-```ts
-const nextConfig: NextConfig = {
-  output: "export",
-  images: { unoptimized: true },
-  basePath: "/energy-analyzer",
-};
-```
+**Custom base path:** Set the `BASE_PATH` environment variable at build time (e.g., `BASE_PATH=/energy-analyzer npm run build`). The GitHub Pages workflow sets this automatically.
 
 **Branch protection:** To require approved merges before deploying, go to **Settings > Branches > Add rule**, set the branch name pattern to `main`, and enable "Require a pull request before merging" with "Require approvals".
 
