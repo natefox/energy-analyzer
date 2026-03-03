@@ -1,0 +1,3 @@
+:HL["/energy-analyzer/_next/static/chunks/faf45358328c207f.css","style"]
+:HL["/energy-analyzer/_next/static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"buildId":"oVb8xnK0Vneh16CNMfOE2","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"analyze","paramType":null,"paramKey":"analyze","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
