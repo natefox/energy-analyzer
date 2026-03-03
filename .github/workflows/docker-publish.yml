@@ -14,7 +14,52 @@ permissions:
   packages: write
 
 jobs:
-  build-and-push:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t energy-analyzer:test .
+
+      - name: Start container
+        run: |
+          docker run -d --name test-container -p 8080:8080 energy-analyzer:test
+          sleep 2
+
+      - name: Verify landing page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/)
+          echo "Landing page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify compare page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/compare)
+          echo "Compare page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify analyze page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/analyze)
+          echo "Analyze page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify page content
+        run: |
+          curl -s http://localhost:8080/ | grep -q "Energy Analyzer"
+          echo "Landing page contains 'Energy Analyzer'"
+          curl -s http://localhost:8080/compare | grep -q "Compare Rate Plans"
+          echo "Compare page contains 'Compare Rate Plans'"
+          curl -s http://localhost:8080/analyze | grep -q "Analyze Your Energy Usage"
+          echo "Analyze page contains 'Analyze Your Energy Usage'"
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f test-container
+
+  push:
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
