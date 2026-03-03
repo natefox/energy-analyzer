@@ -48,7 +48,7 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 ### Setup
 
 ```bash
-git clone https://github.com/your-username/energy-analyzer.git
+git clone https://github.com/natefox/energy-analyzer.git
 cd energy-analyzer
 npm install
 ```
