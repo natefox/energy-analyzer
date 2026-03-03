@@ -1,7 +1,5 @@
 todo
-- [x] add mit license
-- [x] how to update pricing? (documented in README)
-- [x] change color scheme a bit so its not identical to sdge.ca (emerald brand color)
-- [x] add solar exporting (if it exists) to the graphs and attempt to deduce how much it saved
-- [x] update docs across the board
-- [x] set up auto-deploy to github pages from main branch. protect it and ensure merges approved by me are the only ones that can deploy to it (workflow added, branch protection instructions in README)
+
+[] dockerize this so folks can run one docker command to run it locally if they choose. build container and store in github registry
+[] create workflow if a merge is destined for main, it runs a series of checks to validate it prior. this should be done server side
+[] create battery cost analyzer based on current usage and existing battery system costs to see what the payback/roi would be

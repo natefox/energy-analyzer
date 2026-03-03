@@ -8,7 +8,7 @@ Client-side Next.js app that compares utility rate plans and analyzes energy usa
 
 - `npm run dev` — Start dev server (localhost:3000)
 - `npm run build` — Production build (static export to `out/`)
-- `npm test` — Run all tests (Jest, 54 tests across 7 suites)
+- `npm test` — Run all tests (Jest, 42 unit tests + 12 integration tests that auto-skip without CSV files)
 - `npx jest path/to/test.ts` — Run a specific test file
 
 ## Tech Stack
@@ -96,6 +96,10 @@ Plugins are registered in `src/lib/registry.ts`. To add a new utility, create it
 - Integration tests use real CSV files in project root (gitignored)
 - Commit messages follow conventional commits: feat/fix/test/docs/chore
 - Static export compatible with GitHub Pages
+- `basePath` is `/energy-analyzer` in production only (env-conditional in next.config.ts) — dev runs at `/`
+- GitHub Pages auto-deploys from main via `.github/workflows/deploy.yml`
+- Live site: https://natefox.github.io/energy-analyzer/
+- Integration tests skip gracefully when CSV data files are absent (CI-safe)
 
 ## Design Doc
 
