@@ -1,0 +1,92 @@
+name: Bug Report
+description: Something isn't working correctly
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the details below so we can reproduce and fix it.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the app is affected?
+      options:
+        - Compare Plans page
+        - Analyze Usage page
+        - CSV upload / parsing
+        - Rate calculations
+        - Charts / visualizations
+        - Solar generation
+        - Battery ROI calculator
+        - Recommendations
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: utility
+    attributes:
+      label: Utility Provider
+      description: Which utility's data were you using?
+      options:
+        - SDG&E
+        - SCE
+        - N/A
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly. What did you expect to happen vs what actually happened?
+      placeholder: |
+        Expected: The daily cost chart should show costs for each day.
+        Actual: The chart shows $0 for all days even though usage data is present.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: What steps trigger this bug?
+      placeholder: |
+        1. Go to Analyze Usage
+        2. Upload the attached CSV file
+        3. Select TOU-DR1 rate plan
+        4. Scroll to daily cost chart
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample-data
+    attributes:
+      label: Sample CSV Data
+      description: |
+        **Strongly recommended.** Paste a few rows of your CSV (or attach the file) that trigger this bug. Redact your meter number or account info if needed — we only need dates, times, and usage values. Without sample data, most issues are very difficult to diagnose.
+      placeholder: |
+        Date,Energy Consumption time Period Start,Energy Consumption time Period End,Delivered,Received
+        2025-01-15, 12:00AM, 1:00AM, 0.5, 0.0
+        2025-01-15, 1:00AM, 2:00AM, 0.3, 0.0
+        ...
+      render: text
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, or any other relevant details.
+      placeholder: |
+        Browser: Chrome 120
+        OS: macOS 15
+        Running via: GitHub Pages / Docker / npm run dev
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots showing the issue.
