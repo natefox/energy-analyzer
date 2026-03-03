@@ -7,8 +7,9 @@ import { calculateCosts } from "@/lib/calculator";
 import { sdgePlugin } from "../index";
 
 const CSV_PATH = path.resolve(__dirname, "../../../../sdge_download.csv");
+const csvExists = fs.existsSync(CSV_PATH);
 
-describe("SDGE integration with real CSV", () => {
+(csvExists ? describe : describe.skip)("SDGE integration with real CSV", () => {
   let csvText: string;
 
   beforeAll(() => {

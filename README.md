@@ -2,6 +2,8 @@
 
 > Inspired by and built upon the excellent work at [sdge.ca](https://sdge.ca), particularly their [Compare SDG&E Plans](https://sdge.ca/compare-sdge-plans/) and [Analyze Energy Usage](https://sdge.ca/analyze-energy-usage/) tools. This project extends their concept to support multiple California utilities. Full credit to the sdge.ca team for the original idea and approach.
 
+**Live site: [natefox.github.io/energy-analyzer](https://natefox.github.io/energy-analyzer/)**
+
 ## What is this?
 
 Energy Analyzer is a client-side web app that helps California utility customers understand and optimize their electricity costs. It supports **San Diego Gas & Electric (SDG&E)** and **Southern California Edison (SCE)**, with a plugin architecture that makes it easy to add more utilities in the future.

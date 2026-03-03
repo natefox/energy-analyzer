@@ -13,9 +13,11 @@ const LONG_CSV_PATH = path.resolve(
   __dirname,
   "../../../../SCE_Usage_8002472069_11-14-24_to_12-11-25.csv"
 );
+const shortExists = fs.existsSync(SHORT_CSV_PATH);
+const longExists = fs.existsSync(LONG_CSV_PATH);
 
-describe("SCE integration with real CSV", () => {
-  describe("short file (13 days)", () => {
+(shortExists || longExists ? describe : describe.skip)("SCE integration with real CSV", () => {
+  (shortExists ? describe : describe.skip)("short file (13 days)", () => {
     let csvText: string;
 
     beforeAll(() => {
@@ -47,7 +49,7 @@ describe("SCE integration with real CSV", () => {
     });
   });
 
-  describe("long file (391 days)", () => {
+  (longExists ? describe : describe.skip)("long file (391 days)", () => {
     let csvText: string;
 
     beforeAll(() => {
