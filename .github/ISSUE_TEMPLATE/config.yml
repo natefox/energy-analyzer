@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Rate Data Correction
+    url: https://github.com/natefox/energy-analyzer/issues/new?template=bug_report.yml&labels=bug,rate-data&title=%5BRate+Data%5D%3A+
+    about: Report incorrect rate plan pricing or TOU hours
