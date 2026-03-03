@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { IntervalRecord, RatePlan, UtilityPlugin } from "@/lib/types";
+import type { IntervalRecord, NemTier, RatePlan, UtilityPlugin } from "@/lib/types";
 import { calculateCosts } from "@/lib/calculator";
 import { formatCurrency } from "@/lib/utils";
 
@@ -9,11 +9,14 @@ interface Props {
   records: IntervalRecord[];
   plugin: UtilityPlugin;
   selectedPlanId: string;
+  nemTier: NemTier;
 }
 
 interface PlanResult {
   plan: RatePlan;
   totalCost: number;
+  exportCredit: number;
+  netCost: number;
   dailyAvg: number;
   peakCost: number;
   offPeakCost: number;
@@ -21,10 +24,10 @@ interface PlanResult {
   midPeakCost: number;
 }
 
-export default function PlanComparisonTable({ records, plugin, selectedPlanId }: Props) {
+export default function PlanComparisonTable({ records, plugin, selectedPlanId, nemTier }: Props) {
   const planResults = useMemo(() => {
     const results: PlanResult[] = plugin.plans.map((plan) => {
-      const result = calculateCosts(records, plan, plugin);
+      const result = calculateCosts(records, plan, plugin, nemTier);
       const peakCost = result.dailyData.reduce((s, d) => s + d.peakCost, 0);
       const offPeakCost = result.dailyData.reduce((s, d) => s + d.offPeakCost, 0);
       const superOffPeakCost = result.dailyData.reduce((s, d) => s + d.superOffPeakCost, 0);
@@ -33,6 +36,8 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId }:
       return {
         plan,
         totalCost: result.totalCost,
+        exportCredit: result.totalExportCredit,
+        netCost: result.netCost,
         dailyAvg: result.avgDailyCost,
         peakCost,
         offPeakCost,
@@ -41,19 +46,21 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId }:
       };
     });
 
-    return results.sort((a, b) => a.totalCost - b.totalCost);
-  }, [records, plugin]);
+    return results.sort((a, b) => a.netCost - b.netCost);
+  }, [records, plugin, nemTier]);
 
   const selectedResult = planResults.find((r) => r.plan.id === selectedPlanId);
-  const selectedCost = selectedResult?.totalCost ?? 0;
+  const selectedNetCost = selectedResult?.netCost ?? 0;
   const hasMidPeak = planResults.some((r) => r.midPeakCost > 0);
+  const hasExportCredits = planResults.some((r) => r.exportCredit > 0);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
       <div className="p-5 border-b">
         <h3 className="text-lg font-bold">Rate Plan Comparison</h3>
         <p className="text-sm text-gray-500 mt-1">
-          All {plugin.shortName} plans calculated using your actual usage data, sorted by total cost
+          All {plugin.shortName} plans calculated using your actual usage data, sorted by {hasExportCredits ? "net" : "total"} cost
+          {hasExportCredits && ` (${nemTier} export credits applied)`}
         </p>
       </div>
 
@@ -62,7 +69,15 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId }:
           <thead>
             <tr className="bg-gray-50 text-left">
               <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs">Rate Plan</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Total Cost</th>
+              {hasExportCredits ? (
+                <>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Grid Cost</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Export Credit</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Net Cost</th>
+                </>
+              ) : (
+                <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Total Cost</th>
+              )}
               <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Daily Avg</th>
               <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Peak</th>
               <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Off-Peak</th>
@@ -76,7 +91,7 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId }:
           <tbody>
             {planResults.map((r, i) => {
               const isSelected = r.plan.id === selectedPlanId;
-              const savings = selectedCost - r.totalCost;
+              const savings = selectedNetCost - r.netCost;
 
               return (
                 <tr
@@ -99,7 +114,15 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId }:
                       <p className="text-xs text-amber-600 mt-0.5">{r.plan.eligibility}</p>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-right font-semibold">{formatCurrency(r.totalCost)}</td>
+                  {hasExportCredits ? (
+                    <>
+                      <td className="px-4 py-4 text-right">{formatCurrency(r.totalCost)}</td>
+                      <td className="px-4 py-4 text-right text-green-600">-{formatCurrency(r.exportCredit)}</td>
+                      <td className="px-4 py-4 text-right font-semibold">{formatCurrency(r.netCost)}</td>
+                    </>
+                  ) : (
+                    <td className="px-4 py-4 text-right font-semibold">{formatCurrency(r.totalCost)}</td>
+                  )}
                   <td className="px-4 py-4 text-right">{formatCurrency(r.dailyAvg)}</td>
                   <td className="px-4 py-4 text-right">{formatCurrency(r.peakCost)}</td>
                   <td className="px-4 py-4 text-right">{formatCurrency(r.offPeakCost)}</td>

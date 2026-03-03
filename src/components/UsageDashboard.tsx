@@ -1,6 +1,6 @@
 "use client";
 
-import type { AnalysisResult, IntervalRecord, RatePlan, UtilityPlugin } from "@/lib/types";
+import type { AnalysisResult, IntervalRecord, NemTier, RatePlan, UtilityPlugin } from "@/lib/types";
 import RateScheduleDisplay from "./RateScheduleDisplay";
 import UsageSummary from "./UsageSummary";
 import PlanComparisonTable from "./PlanComparisonTable";
@@ -15,9 +15,10 @@ interface Props {
   plugin: UtilityPlugin;
   selectedPlan: RatePlan;
   records: IntervalRecord[];
+  nemTier: NemTier;
 }
 
-export default function UsageDashboard({ result, plugin, selectedPlan, records }: Props) {
+export default function UsageDashboard({ result, plugin, selectedPlan, records, nemTier }: Props) {
   const hasMidPeak = result.dailyData.some((d) => (d.midPeakUsage || 0) > 0);
   const hasSolar = result.totalGeneration > 0;
 
@@ -35,6 +36,7 @@ export default function UsageDashboard({ result, plugin, selectedPlan, records }
         records={records}
         plugin={plugin}
         selectedPlanId={selectedPlan.id}
+        nemTier={nemTier}
       />
       <UsageAdvice
         result={result}

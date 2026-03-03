@@ -22,4 +22,21 @@ export const scePlugin: UtilityPlugin = {
     "Download the CSV file",
   ],
   downloadUrl: "https://www.sce.com/mysce/myaccount",
+  nemConfig: {
+    nem2NbcRate: 0.028, // ~$0.028/kWh non-bypassable charges
+    nem3ExportRates: {
+      summer: {
+        peak: 0.075,
+        offPeak: 0.05,
+        superOffPeak: 0.04,
+        midPeak: 0.06,
+      },
+      winter: {
+        peak: 0.06,
+        offPeak: 0.045,
+        superOffPeak: 0.035,
+        midPeak: 0.05,
+      },
+    },
+  },
 };

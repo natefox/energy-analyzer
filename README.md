@@ -33,7 +33,8 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 - Usage summary: per-period kWh and cost breakdowns, peak hour, lowest usage window
 - Rate plan comparison table: all plans ranked by total cost using your actual data
 - **Solar generation support**: if your CSV includes generation data, see daily production, TOU-period breakdown, solar offset percentage, and net export/grid usage
-- **Personalized recommendations**: data-driven advice on plan switching, peak shifting, solar self-consumption, battery storage, and more
+- **NEM tier support**: select your Net Energy Metering tier (NEM 1.0, 2.0, or 3.0) to see accurate export credits applied to cost calculations. Auto-detects solar and defaults to NEM 2.0. NEM 3.0 shows significantly lower export rates with advice to maximize self-consumption.
+- **Personalized recommendations**: data-driven advice on plan switching, peak shifting, solar self-consumption, battery storage, NEM-aware optimization, and more
 - **Battery ROI calculator**: estimate savings, payback period, and 10-year ROI for home battery systems (presets for Tesla Powerwall, Enphase, Franklin, or custom specs)
 - Switch between rate plans to compare what you'd pay on each
 

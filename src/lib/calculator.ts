@@ -1,15 +1,36 @@
 import type {
   IntervalRecord,
+  NemTier,
   RatePlan,
   UtilityPlugin,
   AnalysisResult,
   DailyData,
 } from "./types";
 
+function getExportCreditRate(
+  nemTier: NemTier,
+  effectiveRate: number,
+  period: string,
+  season: "summer" | "winter",
+  plugin: UtilityPlugin
+): number {
+  switch (nemTier) {
+    case "NEM1":
+      return effectiveRate; // Full retail credit
+    case "NEM2":
+      return Math.max(0, effectiveRate - plugin.nemConfig.nem2NbcRate);
+    case "NEM3":
+      return plugin.nemConfig.nem3ExportRates[season][period] ?? 0;
+    default:
+      return 0; // No export credit
+  }
+}
+
 export function calculateCosts(
   records: IntervalRecord[],
   plan: RatePlan,
-  plugin: UtilityPlugin
+  plugin: UtilityPlugin,
+  nemTier: NemTier = "none"
 ): AnalysisResult {
   const dailyMap = new Map<string, DailyData>();
   const hourlyWeekday = new Array(24).fill(0);
@@ -35,6 +56,10 @@ export function calculateCosts(
     }
     const cost = record.consumption * effectiveRate;
 
+    // Calculate export credit for solar generation
+    const exportCreditRate = getExportCreditRate(nemTier, effectiveRate, period, season, plugin);
+    const exportCredit = record.generation * exportCreditRate;
+
     if (!dailyMap.has(dateKey)) {
       dailyMap.set(dateKey, {
         date: dateKey,
@@ -52,6 +77,7 @@ export function calculateCosts(
         offPeakGeneration: 0,
         superOffPeakGeneration: 0,
         totalGeneration: 0,
+        exportCredit: 0,
       });
     }
     const day = dailyMap.get(dateKey)!;
@@ -75,6 +101,7 @@ export function calculateCosts(
     day.totalCost += cost;
     day.totalUsage += record.consumption;
     day.totalGeneration += record.generation;
+    day.exportCredit += exportCredit;
 
     if (isWeekend) {
       hourlyWeekend[hour] += record.consumption;
@@ -98,6 +125,11 @@ export function calculateCosts(
     (sum, d) => sum + d.totalGeneration,
     0
   );
+  const totalExportCredit = dailyData.reduce(
+    (sum, d) => sum + d.exportCredit,
+    0
+  );
+  const netCost = totalCost - totalExportCredit;
 
   const weekdayProfile = hourlyWeekday.map((total, i) =>
     hourlyWeekdayCount[i] > 0 ? total / hourlyWeekdayCount[i] : 0
@@ -110,9 +142,11 @@ export function calculateCosts(
   return {
     dailyData,
     totalCost,
+    totalExportCredit,
+    netCost,
     totalUsage,
     totalGeneration,
-    avgDailyCost: daysAnalyzed > 0 ? totalCost / daysAnalyzed : 0,
+    avgDailyCost: daysAnalyzed > 0 ? netCost / daysAnalyzed : 0,
     avgDailyUsage: daysAnalyzed > 0 ? totalUsage / daysAnalyzed : 0,
     hourlyProfile: { weekday: weekdayProfile, weekend: weekendProfile },
     dateRange: {
@@ -120,6 +154,7 @@ export function calculateCosts(
       end: dates[dates.length - 1] || "",
     },
     daysAnalyzed,
+    nemTier,
   };
 }
 
