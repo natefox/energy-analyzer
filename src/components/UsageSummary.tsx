@@ -10,9 +10,11 @@ interface Props {
 
 function formatHourRange(hour: number): string {
   const fmt = (h: number) => {
-    if (h === 0 || h === 24) return "12:00";
-    if (h === 12) return "12:00";
-    return h < 12 ? `${h}:00` : `${h - 12}:00`;
+    const suffix = h < 12 || h === 24 ? "AM" : "PM";
+    if (h === 0 || h === 24) return `12:00 ${suffix}`;
+    if (h === 12) return `12:00 ${suffix}`;
+    const display = h <= 12 ? h : h - 12;
+    return `${display}:00 ${suffix}`;
   };
   return `${fmt(hour)} - ${fmt(hour + 1)}`;
 }
