@@ -1,0 +1,93 @@
+name: Weekly Rate Check
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Every Monday at 9am UTC
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-rates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for git log dates
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check rate freshness
+        id: check
+        continue-on-error: true
+        run: npx ts-node scripts/check-rates.ts
+
+      - name: Create or update issue if stale
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const staleUtilities = '${{ steps.check.outputs.stale_utilities }}' || 'Unknown';
+            const title = `Rate update needed: ${staleUtilities}`;
+            const body = `## Rate Plan Update Needed
+
+            The following utility rate files haven't been updated in over 90 days:
+
+            **${staleUtilities}**
+
+            ### How to verify rates
+
+            #### SDG&E
+            - [SDG&E Schedule DR](https://www.sdge.com/sites/default/files/regulatory/Schedule%20DR%20Effective%2001-01-2025.pdf) — Residential rate schedules
+            - [SDG&E Rate History](https://www.sdge.com/regulation/tariffs) — All tariff books
+            - Check rates against \`src/plugins/sdge/plans.ts\`
+
+            #### SCE
+            - [SCE Residential Rate Plans](https://www.sce.com/residential/rates/Time-Of-Use-Residential-Rate-Plans) — Current TOU rates
+            - [SCE Tariff Books](https://www.sce.com/regulatory/tariff-books) — Official schedules
+            - Check rates against \`src/plugins/sce/plans.ts\`
+
+            ### What to update
+            1. Verify current rates at the links above
+            2. Update \`src/plugins/<utility>/plans.ts\` with new rates
+            3. Run \`npm test\` to ensure tests still pass
+            4. Run \`npx ts-node scripts/check-rates.ts\` to verify freshness
+            5. Submit a PR with the updated rates
+
+            _This issue was automatically created by the weekly rate check workflow._`;
+
+            // Check for existing open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'rate-update',
+            });
+
+            const existing = issues.data.find(i => i.title.startsWith('Rate update needed'));
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              console.log(`Updated existing issue #${existing.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['rate-update', 'automated'],
+              });
+              console.log(`Created issue #${created.data.number}`);
+            }

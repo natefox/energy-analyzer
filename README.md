@@ -142,6 +142,16 @@ The same structure applies to `winter` and all other period keys (`offPeak`, `su
 
 After updating rates, run `npm test` to ensure nothing breaks, and manually verify a sample calculation against the utility's online calculator if available.
 
+### Automated Rate Freshness Checks
+
+A GitHub Actions workflow (`rate-check.yml`) runs every Monday and checks when rate files were last updated. If any rate file is older than 90 days, it automatically creates a GitHub issue with links to verify current rates.
+
+You can also check locally:
+
+```bash
+npx ts-node scripts/check-rates.ts
+```
+
 ## Tech Stack
 
 - Next.js (App Router) with static export
