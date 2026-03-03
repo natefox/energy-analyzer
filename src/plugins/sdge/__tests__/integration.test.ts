@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import { detectCsv, parseCsv } from "../parser";
-import { classifyInterval, getSeason } from "../tou";
 import { sdgePlans } from "../plans";
 import { calculateCosts } from "@/lib/calculator";
 import { sdgePlugin } from "../index";
