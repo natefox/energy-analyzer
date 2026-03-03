@@ -124,12 +124,25 @@ export default function UsageSummary({ result, hasSolar }: Props) {
           <p className="text-sm font-medium text-emerald-600">Total Usage</p>
           <p className="text-2xl font-bold">{formatKwh(result.totalUsage)}</p>
           <p className="text-xs text-gray-500">Over {result.daysAnalyzed} days</p>
-          <p className="text-sm font-semibold text-emerald-600 mt-2">
-            {formatCurrency(result.totalCost)}
-          </p>
-          <p className="text-xs text-gray-500">
-            Average {formatCurrency(result.avgDailyCost)}/day
-          </p>
+          {result.totalExportCredit > 0 ? (
+            <>
+              <p className="text-sm font-semibold text-emerald-600 mt-2">
+                {formatCurrency(result.netCost)}
+              </p>
+              <p className="text-xs text-gray-500">
+                Net cost ({formatCurrency(result.totalCost)} - {formatCurrency(result.totalExportCredit)} credits)
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-emerald-600 mt-2">
+                {formatCurrency(result.totalCost)}
+              </p>
+              <p className="text-xs text-gray-500">
+                Average {formatCurrency(result.avgDailyCost)}/day
+              </p>
+            </>
+          )}
         </div>
 
         {/* Period cards */}
@@ -230,7 +243,7 @@ export default function UsageSummary({ result, hasSolar }: Props) {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div className={`grid grid-cols-1 ${result.totalExportCredit > 0 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-3 mt-3`}>
               <div className="rounded-lg border border-yellow-100 p-4">
                 <p className="text-sm font-medium text-yellow-600">Solar Offset</p>
                 <p className="text-2xl font-bold">{selfConsumptionPct.toFixed(1)}%</p>
@@ -257,6 +270,15 @@ export default function UsageSummary({ result, hasSolar }: Props) {
                   </>
                 )}
               </div>
+              {result.totalExportCredit > 0 && (
+                <div className="rounded-lg border border-green-100 p-4">
+                  <p className="text-sm font-medium text-green-600">Export Credit ({result.nemTier})</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(result.totalExportCredit)}</p>
+                  <p className="text-xs text-gray-500">
+                    Avg. {formatCurrency(result.totalExportCredit / result.daysAnalyzed)}/day from solar exports
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         );

@@ -44,14 +44,14 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
     );
     const peakPct = result.totalUsage > 0 ? (totals.peakUsage / result.totalUsage) * 100 : 0;
 
-    // --- Cheapest plan check ---
-    const planCosts = plugin.plans.map((plan) => ({
-      plan,
-      cost: calculateCosts(records, plan, plugin).totalCost,
-    }));
+    // --- Cheapest plan check (use net cost when NEM is active) ---
+    const planCosts = plugin.plans.map((plan) => {
+      const r = calculateCosts(records, plan, plugin, result.nemTier);
+      return { plan, cost: r.netCost };
+    });
     planCosts.sort((a, b) => a.cost - b.cost);
     const cheapest = planCosts[0];
-    const currentCost = planCosts.find((p) => p.plan.id === selectedPlan.id)?.cost ?? result.totalCost;
+    const currentCost = planCosts.find((p) => p.plan.id === selectedPlan.id)?.cost ?? result.netCost;
 
     if (cheapest && cheapest.plan.id !== selectedPlan.id) {
       const savings = currentCost - cheapest.cost;
@@ -157,6 +157,16 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
           icon: "\u{1F50B}",
           title: "Consider battery storage",
           detail: `You exported ${formatKwh(result.totalGeneration - result.totalUsage)} more than you consumed from the grid. A home battery could store excess solar for use during peak hours instead of exporting it at lower NEM rates.`,
+        });
+      }
+
+      // NEM3-specific advice
+      if (result.nemTier === "NEM3" && result.totalExportCredit > 0) {
+        const avgExportRate = result.totalExportCredit / result.totalGeneration;
+        advice.push({
+          icon: "\u{1F4CA}",
+          title: "NEM 3.0 export rates are low — maximize self-consumption",
+          detail: `Your average export credit is ${(avgExportRate * 100).toFixed(1)}\u00A2/kWh, much less than retail rates. Shift heavy loads to solar hours and consider battery storage to use your solar power during expensive peak hours rather than exporting at low rates.`,
         });
       }
     }

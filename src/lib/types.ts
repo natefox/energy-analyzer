@@ -1,6 +1,7 @@
 export type TouPeriod = "peak" | "offPeak" | "superOffPeak" | "midPeak";
 export type Season = "summer" | "winter";
 export type DayType = "weekday" | "weekend";
+export type NemTier = "none" | "NEM1" | "NEM2" | "NEM3";
 
 export interface IntervalRecord {
   date: Date;
@@ -41,6 +42,14 @@ export interface RatePlan {
   };
 }
 
+export interface NemConfig {
+  nem2NbcRate: number; // Non-bypassable charges for NEM2 ($/kWh)
+  nem3ExportRates: {
+    summer: Record<string, number>; // period → $/kWh export credit
+    winter: Record<string, number>;
+  };
+}
+
 export interface UtilityPlugin {
   id: string;
   name: string;
@@ -54,6 +63,7 @@ export interface UtilityPlugin {
   summerMonths: number[];
   downloadInstructions: string[];
   downloadUrl: string;
+  nemConfig: NemConfig;
 }
 
 export interface DailyData {
@@ -72,11 +82,14 @@ export interface DailyData {
   offPeakGeneration: number;
   superOffPeakGeneration: number;
   totalGeneration: number;
+  exportCredit: number;
 }
 
 export interface AnalysisResult {
   dailyData: DailyData[];
   totalCost: number;
+  totalExportCredit: number;
+  netCost: number;
   totalUsage: number;
   totalGeneration: number;
   avgDailyCost: number;
@@ -84,4 +97,5 @@ export interface AnalysisResult {
   hourlyProfile: { weekday: number[]; weekend: number[] };
   dateRange: { start: string; end: string };
   daysAnalyzed: number;
+  nemTier: NemTier;
 }

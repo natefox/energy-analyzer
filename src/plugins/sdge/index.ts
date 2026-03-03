@@ -22,4 +22,21 @@ export const sdgePlugin: UtilityPlugin = {
     "Click Export and download the CSV file",
   ],
   downloadUrl: "https://myaccount.sdge.com",
+  nemConfig: {
+    nem2NbcRate: 0.025, // ~$0.025/kWh non-bypassable charges
+    nem3ExportRates: {
+      summer: {
+        peak: 0.065,
+        offPeak: 0.045,
+        superOffPeak: 0.035,
+        midPeak: 0.055,
+      },
+      winter: {
+        peak: 0.055,
+        offPeak: 0.04,
+        superOffPeak: 0.03,
+        midPeak: 0.045,
+      },
+    },
+  },
 };
