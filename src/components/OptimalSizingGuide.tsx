@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import type { AnalysisResult, IntervalRecord, RatePlan, UtilityPlugin } from "@/lib/types";
 import { formatCurrency, formatKwh } from "@/lib/utils";
 
@@ -148,7 +148,12 @@ function simulateSystem(
   };
 }
 
+type SortKey = "solarKw" | "batteryKwh" | "systemCost" | "annualSavings" | "paybackYears" | "roi25Year" | "billReductionPct";
+
 export default function OptimalSizingGuide({ result, records, plugin, selectedPlan }: Props) {
+  const [sortKey, setSortKey] = useState<SortKey>("paybackYears");
+  const [sortAsc, setSortAsc] = useState(true);
+
   const analysis = useMemo(() => {
     const currentAnnualCost = result.daysAnalyzed > 0
       ? (result.netCost / result.daysAnalyzed) * 365
@@ -276,18 +281,34 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs">Solar</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs">Battery</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs text-right">Cost</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs text-right">Annual Savings</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs text-right">Payback</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs text-right">25yr ROI</th>
-                  <th className="px-3 py-2 font-semibold text-gray-600 text-xs text-right">Bill %</th>
+                  {([
+                    ["solarKw", "Solar", false],
+                    ["batteryKwh", "Battery", false],
+                    ["systemCost", "Cost", true],
+                    ["annualSavings", "Annual Savings", true],
+                    ["paybackYears", "Payback", true],
+                    ["roi25Year", "25yr ROI", true],
+                    ["billReductionPct", "Bill %", true],
+                  ] as [SortKey, string, boolean][]).map(([key, label, right]) => (
+                    <th
+                      key={key}
+                      onClick={() => {
+                        if (sortKey === key) setSortAsc(!sortAsc);
+                        else { setSortKey(key); setSortAsc(key === "paybackYears" || key === "systemCost" || key === "solarKw" || key === "batteryKwh"); }
+                      }}
+                      className={`px-3 py-2 font-semibold text-gray-600 text-xs cursor-pointer select-none hover:text-gray-900 ${right ? "text-right" : ""}`}
+                    >
+                      {label} {sortKey === key ? (sortAsc ? "▲" : "▼") : ""}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {analysis.allResults
-                  .sort((a, b) => b.roi25Year - a.roi25Year)
+                {[...analysis.allResults]
+                  .sort((a, b) => {
+                    const av = a[sortKey], bv = b[sortKey];
+                    return sortAsc ? (av as number) - (bv as number) : (bv as number) - (av as number);
+                  })
                   .map((r, i) => (
                     <tr key={`${r.solarKw}-${r.batteryKwh}`} className={`border-t ${r === bestRoi ? "bg-emerald-50" : i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                       <td className="px-3 py-2">{r.solarKw} kW</td>
