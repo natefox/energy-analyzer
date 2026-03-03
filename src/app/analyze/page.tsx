@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import type { IntervalRecord, UtilityPlugin } from "@/lib/types";
 import { getPlugins } from "@/lib/registry";
 import CsvUploader from "@/components/CsvUploader";
@@ -13,14 +13,11 @@ export default function AnalyzePage() {
   const [plugin, setPlugin] = useState<UtilityPlugin | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
 
-  const handleDataLoaded = useCallback(
-    (newRecords: IntervalRecord[], detectedPlugin: UtilityPlugin) => {
-      setRecords(newRecords);
-      setPlugin(detectedPlugin);
-      setSelectedPlanId(detectedPlugin.defaultPlanId);
-    },
-    []
-  );
+  const handleDataLoaded = (newRecords: IntervalRecord[], detectedPlugin: UtilityPlugin) => {
+    setRecords(newRecords);
+    setPlugin(detectedPlugin);
+    setSelectedPlanId(detectedPlugin.defaultPlanId);
+  };
 
   const selectedPlan = plugin?.plans.find((p) => p.id === selectedPlanId);
 
