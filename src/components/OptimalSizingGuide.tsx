@@ -23,7 +23,6 @@ const SOLAR_HOURLY_PROFILE = [
 const COST_PER_WATT_SOLAR = 3.0;
 const PEAK_SUN_HOURS = 5.5;
 const SOLAR_EFFICIENCY = 0.85;
-const ITC_RATE = 0.30;
 const SOLAR_DEGRADATION = 0.005;
 const BATTERY_EFFICIENCY = 0.90;
 const BATTERY_COST_PER_KWH = 1100; // $/kWh installed (approximate market rate)
@@ -117,11 +116,9 @@ function simulateSystem(
     totalSavings += exported * exportRate;
   }
 
-  const solarCostGross = solarKw * 1000 * COST_PER_WATT_SOLAR;
+  const solarCost = solarKw * 1000 * COST_PER_WATT_SOLAR;
   const batteryCost = batteryKwh * BATTERY_COST_PER_KWH;
-  const totalCostGross = solarCostGross + batteryCost;
-  const itcSavings = totalCostGross * ITC_RATE;
-  const systemCost = totalCostGross - itcSavings;
+  const systemCost = solarCost + batteryCost;
 
   const annualSavings = daysAnalyzed > 0 ? (totalSavings / daysAnalyzed) * 365 : 0;
 
@@ -216,7 +213,7 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
         <p className={`text-sm font-semibold mb-2 ${color.replace("border-", "text-").replace("100", "700")}`}>{title}</p>
         <div className="space-y-1 text-sm">
           <p><strong>{r.solarKw} kW solar</strong>{r.batteryKwh > 0 ? ` + ${r.batteryKwh} kWh battery` : " (no battery)"}</p>
-          <p>System cost: <strong>{formatCurrency(r.systemCost)}</strong> <span className="text-xs text-gray-500">(after 30% ITC)</span></p>
+          <p>System cost: <strong>{formatCurrency(r.systemCost)}</strong></p>
           <p>Annual savings: <strong className="text-emerald-600">{formatCurrency(r.annualSavings)}</strong></p>
           <p>Payback: <strong>{r.paybackYears.toFixed(1)} years</strong></p>
           <p>25-year ROI: <strong>{r.roi25Year.toFixed(0)}%</strong></p>
@@ -232,7 +229,7 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
         <h3 className="text-lg font-bold">Optimal Solar + Battery Sizing</h3>
         <p className="text-sm text-gray-500 mt-1">
           Recommendations based on your actual usage ({result.daysAnalyzed} days). Current annual cost: {formatCurrency(currentAnnualCost)}.
-          All scenarios use NEM 3.0 rates and include 30% federal tax credit.
+          All scenarios use NEM 3.0 rates.
         </p>
       </div>
 
@@ -308,7 +305,7 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
         </details>
 
         <p className="text-xs text-gray-400 pt-2">
-          Estimates use $3.00/W solar, ${BATTERY_COST_PER_KWH}/kWh battery (installed), {PEAK_SUN_HOURS} peak sun hours, {(SOLAR_EFFICIENCY * 100).toFixed(0)}% system efficiency, {(BATTERY_EFFICIENCY * 100).toFixed(0)}% battery round-trip efficiency, {(SOLAR_DEGRADATION * 100).toFixed(1)}%/yr degradation, and 30% federal ITC. NEM 3.0 export rates applied. Actual results vary by location, roof orientation, shading, installer pricing, and utility rate changes.
+          Estimates use $3.00/W solar, ${BATTERY_COST_PER_KWH}/kWh battery (installed), {PEAK_SUN_HOURS} peak sun hours, {(SOLAR_EFFICIENCY * 100).toFixed(0)}% system efficiency, {(BATTERY_EFFICIENCY * 100).toFixed(0)}% battery round-trip efficiency, and {(SOLAR_DEGRADATION * 100).toFixed(1)}%/yr degradation. NEM 3.0 export rates applied. Actual results vary by location, roof orientation, shading, installer pricing, and utility rate changes.
         </p>
       </div>
     </div>
