@@ -5,7 +5,9 @@ import RateScheduleDisplay from "./RateScheduleDisplay";
 import UsageSummary from "./UsageSummary";
 import PlanComparisonTable from "./PlanComparisonTable";
 import UsageAdvice from "./UsageAdvice";
+import SolarAnalyzer from "./SolarAnalyzer";
 import BatteryAnalyzer from "./BatteryAnalyzer";
+import OptimalSizingGuide from "./OptimalSizingGuide";
 import DailyUsageChart from "./charts/DailyUsageChart";
 import DailyCostChart from "./charts/DailyCostChart";
 import HourlyDistributionChart from "./charts/HourlyDistributionChart";
@@ -39,6 +41,18 @@ export default function UsageDashboard({ result, plugin, selectedPlan, records, 
         nemTier={nemTier}
       />
       <UsageAdvice
+        result={result}
+        records={records}
+        plugin={plugin}
+        selectedPlan={selectedPlan}
+      />
+      <OptimalSizingGuide
+        result={result}
+        records={records}
+        plugin={plugin}
+        selectedPlan={selectedPlan}
+      />
+      <SolarAnalyzer
         result={result}
         records={records}
         plugin={plugin}
