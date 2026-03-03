@@ -35,6 +35,7 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 - **Solar generation support**: if your CSV includes generation data, see daily production, TOU-period breakdown, solar offset percentage, and net export/grid usage
 - **NEM tier support**: select your Net Energy Metering tier (NEM 1.0, 2.0, or 3.0) to see accurate export credits applied to cost calculations. Auto-detects solar and defaults to NEM 2.0. NEM 3.0 shows significantly lower export rates with advice to maximize self-consumption.
 - **Personalized recommendations**: data-driven advice on plan switching, peak shifting, solar self-consumption, battery storage, NEM-aware optimization, and more
+- **Optimal solar + battery sizing**: automatically simulates 30+ solar/battery combinations against your actual usage to find the best ROI, fastest payback, and maximum bill reduction. Shows detailed comparison table with all scenarios.
 - **Solar ROI calculator**: estimate savings from adding solar panels (or more panels) based on your actual usage under NEM 3.0. Preset system sizes (4-12 kW) or custom, with 30% federal ITC, 25-year ROI, self-consumption vs export breakdown.
 - **Battery ROI calculator**: estimate savings, payback period, and 10-year ROI for home battery systems (presets for Tesla Powerwall, Enphase, Franklin, or custom specs)
 - Switch between rate plans to compare what you'd pay on each
