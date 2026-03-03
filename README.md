@@ -34,6 +34,7 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 - Rate plan comparison table: all plans ranked by total cost using your actual data
 - **Solar generation support**: if your CSV includes generation data, see daily production, TOU-period breakdown, solar offset percentage, and net export/grid usage
 - **Personalized recommendations**: data-driven advice on plan switching, peak shifting, solar self-consumption, battery storage, and more
+- **Battery ROI calculator**: estimate savings, payback period, and 10-year ROI for home battery systems (presets for Tesla Powerwall, Enphase, Franklin, or custom specs)
 - Switch between rate plans to compare what you'd pay on each
 
 ### Supported CSV Formats

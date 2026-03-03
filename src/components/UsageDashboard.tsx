@@ -5,6 +5,7 @@ import RateScheduleDisplay from "./RateScheduleDisplay";
 import UsageSummary from "./UsageSummary";
 import PlanComparisonTable from "./PlanComparisonTable";
 import UsageAdvice from "./UsageAdvice";
+import BatteryAnalyzer from "./BatteryAnalyzer";
 import DailyUsageChart from "./charts/DailyUsageChart";
 import DailyCostChart from "./charts/DailyCostChart";
 import HourlyDistributionChart from "./charts/HourlyDistributionChart";
@@ -38,6 +39,11 @@ export default function UsageDashboard({ result, plugin, selectedPlan, records }
       <UsageAdvice
         result={result}
         records={records}
+        plugin={plugin}
+        selectedPlan={selectedPlan}
+      />
+      <BatteryAnalyzer
+        result={result}
         plugin={plugin}
         selectedPlan={selectedPlan}
       />

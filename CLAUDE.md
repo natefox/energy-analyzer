@@ -65,6 +65,7 @@ Plugins are registered in `src/lib/registry.ts`. To add a new utility, create it
 - `UsageSummary` — TOU period breakdown with percentages, peak hour, lowest usage, most efficient time; solar generation summary when data present
 - `PlanComparisonTable` — All plans ranked by cost using actual CSV data
 - `UsageAdvice` — Data-driven personalized recommendations (plan switching, peak shifting, solar optimization, battery storage)
+- `BatteryAnalyzer` — Battery ROI calculator with presets and custom specs, estimates savings/payback/10-year ROI
 - `PlanComparison` / `PlanCard` — Parametric comparison on /compare page
 - `charts/DailyUsageChart` — Stacked bars by TOU period + solar generation (negative bars when present)
 - `charts/DailyCostChart`, `HourlyDistributionChart` — Recharts stacked bars
