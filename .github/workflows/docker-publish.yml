@@ -1,0 +1,87 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t energy-analyzer:test .
+
+      - name: Start container
+        run: |
+          docker run -d --name test-container -p 8080:8080 energy-analyzer:test
+          sleep 2
+
+      - name: Verify landing page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/)
+          echo "Landing page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify compare page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/compare)
+          echo "Compare page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify analyze page
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/analyze)
+          echo "Analyze page status: $STATUS"
+          [ "$STATUS" = "200" ]
+
+      - name: Verify page content
+        run: |
+          curl -s http://localhost:8080/ | grep -q "Energy Analyzer"
+          echo "Landing page contains 'Energy Analyzer'"
+          curl -s http://localhost:8080/compare | grep -q "Compare Rate Plans"
+          echo "Compare page contains 'Compare Rate Plans'"
+          curl -s http://localhost:8080/analyze | grep -q "Analyze Your Energy Usage"
+          echo "Analyze page contains 'Analyze Your Energy Usage'"
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f test-container
+
+  push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

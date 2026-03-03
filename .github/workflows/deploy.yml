@@ -29,6 +29,8 @@ jobs:
       - run: npm test
 
       - run: npm run build
+        env:
+          BASE_PATH: /energy-analyzer
 
       - uses: actions/upload-pages-artifact@v3
         with:
