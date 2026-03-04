@@ -37,7 +37,16 @@ export default function UsageSummary({ result, hasSolar }: Props) {
       superOffPeakCost: acc.superOffPeakCost + d.superOffPeakCost,
       midPeakCost: acc.midPeakCost + (d.midPeakCost || 0),
     }),
-    { peakUsage: 0, offPeakUsage: 0, superOffPeakUsage: 0, midPeakUsage: 0, peakCost: 0, offPeakCost: 0, superOffPeakCost: 0, midPeakCost: 0 }
+    {
+      peakUsage: 0,
+      offPeakUsage: 0,
+      superOffPeakUsage: 0,
+      midPeakUsage: 0,
+      peakCost: 0,
+      offPeakCost: 0,
+      superOffPeakCost: 0,
+      midPeakCost: 0,
+    }
   );
 
   // Find peak usage hour from hourly profiles (combined weekday + weekend)
@@ -52,10 +61,7 @@ export default function UsageSummary({ result, hasSolar }: Props) {
   let lowestSum = Infinity;
   let lowestStart = 0;
   for (let i = 0; i < 24; i++) {
-    const sum =
-      combinedHourly[i] +
-      combinedHourly[(i + 1) % 24] +
-      combinedHourly[(i + 2) % 24];
+    const sum = combinedHourly[i] + combinedHourly[(i + 1) % 24] + combinedHourly[(i + 2) % 24];
     if (sum < lowestSum) {
       lowestSum = sum;
       lowestStart = i;
@@ -73,9 +79,7 @@ export default function UsageSummary({ result, hasSolar }: Props) {
     periodCosts.push({ name: "Mid-Peak", cost: totals.midPeakCost });
   }
   const totalCostFromPeriods = periodCosts.reduce((s, p) => s + p.cost, 0);
-  const mostEfficient = periodCosts.reduce((best, p) =>
-    p.cost > best.cost ? p : best
-  );
+  const mostEfficient = periodCosts.reduce((best, p) => (p.cost > best.cost ? p : best));
 
   const hasMidPeak = totals.midPeakUsage > 0;
 
@@ -132,7 +136,8 @@ export default function UsageSummary({ result, hasSolar }: Props) {
                 {formatCurrency(result.netCost)}
               </p>
               <p className="text-xs text-gray-500">
-                Net cost ({formatCurrency(result.totalCost)} - {formatCurrency(result.totalExportCredit)} credits)
+                Net cost ({formatCurrency(result.totalCost)} -{" "}
+                {formatCurrency(result.totalExportCredit)} credits)
               </p>
             </>
           ) : (
@@ -181,9 +186,7 @@ export default function UsageSummary({ result, hasSolar }: Props) {
             {formatHourRange(lowestStart).split(" - ")[0]} -{" "}
             {formatHourRange(lowestStart + 2).split(" - ")[1]}
           </p>
-          <p className="text-xs text-gray-500">
-            Avg. {formatKwh(lowestAvg)} during this period
-          </p>
+          <p className="text-xs text-gray-500">Avg. {formatKwh(lowestAvg)} during this period</p>
         </div>
         <div className="rounded-lg border p-4">
           <p className="text-sm font-medium text-emerald-600">Most Efficient Time</p>
@@ -195,96 +198,109 @@ export default function UsageSummary({ result, hasSolar }: Props) {
       </div>
 
       {/* Solar generation summary */}
-      {hasSolar && result.totalGeneration > 0 && (() => {
-        const genTotals = result.dailyData.reduce(
-          (acc, d) => ({
-            peak: acc.peak + d.peakGeneration,
-            offPeak: acc.offPeak + d.offPeakGeneration,
-            superOffPeak: acc.superOffPeak + d.superOffPeakGeneration,
-          }),
-          { peak: 0, offPeak: 0, superOffPeak: 0 }
-        );
-        const avgDailyGen = result.totalGeneration / result.daysAnalyzed;
-        const selfConsumptionPct = result.totalUsage > 0
-          ? Math.min(100, (result.totalGeneration / (result.totalUsage + result.totalGeneration)) * 100)
-          : 0;
+      {hasSolar &&
+        result.totalGeneration > 0 &&
+        (() => {
+          const genTotals = result.dailyData.reduce(
+            (acc, d) => ({
+              peak: acc.peak + d.peakGeneration,
+              offPeak: acc.offPeak + d.offPeakGeneration,
+              superOffPeak: acc.superOffPeak + d.superOffPeakGeneration,
+            }),
+            { peak: 0, offPeak: 0, superOffPeak: 0 }
+          );
+          const avgDailyGen = result.totalGeneration / result.daysAnalyzed;
+          const selfConsumptionPct =
+            result.totalUsage > 0
+              ? Math.min(
+                  100,
+                  (result.totalGeneration / (result.totalUsage + result.totalGeneration)) * 100
+                )
+              : 0;
 
-        return (
-          <div className="border-t pt-5">
-            <h4 className="text-lg font-bold flex items-center gap-2">
-              <span className="text-yellow-500">&#9728;</span> Solar Generation Summary
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-              <div className="rounded-lg border border-yellow-100 p-4">
-                <p className="text-sm font-medium text-yellow-600">Total Generated</p>
-                <p className="text-2xl font-bold">{formatKwh(result.totalGeneration)}</p>
-                <p className="text-xs text-gray-500">Over {result.daysAnalyzed} days</p>
-                <p className="text-sm font-semibold text-yellow-600 mt-2">
-                  Avg. {formatKwh(avgDailyGen)}/day
-                </p>
-              </div>
-              <div className="rounded-lg border border-red-100 p-4">
-                <p className="text-sm font-medium text-red-500">Peak Generation</p>
-                <p className="text-2xl font-bold">{formatKwh(genTotals.peak)}</p>
-                <p className="text-xs text-gray-500">
-                  {pct(genTotals.peak, result.totalGeneration)} of solar
-                </p>
-              </div>
-              <div className="rounded-lg border border-blue-100 p-4">
-                <p className="text-sm font-medium text-blue-500">Off-Peak Generation</p>
-                <p className="text-2xl font-bold">{formatKwh(genTotals.offPeak)}</p>
-                <p className="text-xs text-gray-500">
-                  {pct(genTotals.offPeak, result.totalGeneration)} of solar
-                </p>
-              </div>
-              <div className="rounded-lg border border-green-100 p-4">
-                <p className="text-sm font-medium text-green-500">Super Off-Peak Gen.</p>
-                <p className="text-2xl font-bold">{formatKwh(genTotals.superOffPeak)}</p>
-                <p className="text-xs text-gray-500">
-                  {pct(genTotals.superOffPeak, result.totalGeneration)} of solar
-                </p>
-              </div>
-            </div>
-            <div className={`grid grid-cols-1 ${result.totalExportCredit > 0 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-3 mt-3`}>
-              <div className="rounded-lg border border-yellow-100 p-4">
-                <p className="text-sm font-medium text-yellow-600">Solar Offset</p>
-                <p className="text-2xl font-bold">{selfConsumptionPct.toFixed(1)}%</p>
-                <p className="text-xs text-gray-500">
-                  of total energy came from solar
-                </p>
-              </div>
-              <div className="rounded-lg border border-yellow-100 p-4">
-                {result.totalUsage >= result.totalGeneration ? (
-                  <>
-                    <p className="text-sm font-medium text-yellow-600">Net Grid Usage</p>
-                    <p className="text-2xl font-bold">{formatKwh(result.totalUsage - result.totalGeneration)}</p>
-                    <p className="text-xs text-gray-500">
-                      Grid consumption after solar offset
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-green-600">Net Exported</p>
-                    <p className="text-2xl font-bold text-green-600">{formatKwh(result.totalGeneration - result.totalUsage)}</p>
-                    <p className="text-xs text-gray-500">
-                      Solar exported more than consumed from grid
-                    </p>
-                  </>
-                )}
-              </div>
-              {result.totalExportCredit > 0 && (
-                <div className="rounded-lg border border-green-100 p-4">
-                  <p className="text-sm font-medium text-green-600">Export Credit ({result.nemTier})</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(result.totalExportCredit)}</p>
-                  <p className="text-xs text-gray-500">
-                    Avg. {formatCurrency(result.totalExportCredit / result.daysAnalyzed)}/day from solar exports
+          return (
+            <div className="border-t pt-5">
+              <h4 className="text-lg font-bold flex items-center gap-2">
+                <span className="text-yellow-500">&#9728;</span> Solar Generation Summary
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                <div className="rounded-lg border border-yellow-100 p-4">
+                  <p className="text-sm font-medium text-yellow-600">Total Generated</p>
+                  <p className="text-2xl font-bold">{formatKwh(result.totalGeneration)}</p>
+                  <p className="text-xs text-gray-500">Over {result.daysAnalyzed} days</p>
+                  <p className="text-sm font-semibold text-yellow-600 mt-2">
+                    Avg. {formatKwh(avgDailyGen)}/day
                   </p>
                 </div>
-              )}
+                <div className="rounded-lg border border-red-100 p-4">
+                  <p className="text-sm font-medium text-red-500">Peak Generation</p>
+                  <p className="text-2xl font-bold">{formatKwh(genTotals.peak)}</p>
+                  <p className="text-xs text-gray-500">
+                    {pct(genTotals.peak, result.totalGeneration)} of solar
+                  </p>
+                </div>
+                <div className="rounded-lg border border-blue-100 p-4">
+                  <p className="text-sm font-medium text-blue-500">Off-Peak Generation</p>
+                  <p className="text-2xl font-bold">{formatKwh(genTotals.offPeak)}</p>
+                  <p className="text-xs text-gray-500">
+                    {pct(genTotals.offPeak, result.totalGeneration)} of solar
+                  </p>
+                </div>
+                <div className="rounded-lg border border-green-100 p-4">
+                  <p className="text-sm font-medium text-green-500">Super Off-Peak Gen.</p>
+                  <p className="text-2xl font-bold">{formatKwh(genTotals.superOffPeak)}</p>
+                  <p className="text-xs text-gray-500">
+                    {pct(genTotals.superOffPeak, result.totalGeneration)} of solar
+                  </p>
+                </div>
+              </div>
+              <div
+                className={`grid grid-cols-1 ${result.totalExportCredit > 0 ? "md:grid-cols-3" : "md:grid-cols-2"} gap-3 mt-3`}
+              >
+                <div className="rounded-lg border border-yellow-100 p-4">
+                  <p className="text-sm font-medium text-yellow-600">Solar Offset</p>
+                  <p className="text-2xl font-bold">{selfConsumptionPct.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-500">of total energy came from solar</p>
+                </div>
+                <div className="rounded-lg border border-yellow-100 p-4">
+                  {result.totalUsage >= result.totalGeneration ? (
+                    <>
+                      <p className="text-sm font-medium text-yellow-600">Net Grid Usage</p>
+                      <p className="text-2xl font-bold">
+                        {formatKwh(result.totalUsage - result.totalGeneration)}
+                      </p>
+                      <p className="text-xs text-gray-500">Grid consumption after solar offset</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-green-600">Net Exported</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {formatKwh(result.totalGeneration - result.totalUsage)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Solar exported more than consumed from grid
+                      </p>
+                    </>
+                  )}
+                </div>
+                {result.totalExportCredit > 0 && (
+                  <div className="rounded-lg border border-green-100 p-4">
+                    <p className="text-sm font-medium text-green-600">
+                      Export Credit ({result.nemTier})
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {formatCurrency(result.totalExportCredit)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Avg. {formatCurrency(result.totalExportCredit / result.daysAnalyzed)}/day from
+                      solar exports
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
     </div>
   );
 }

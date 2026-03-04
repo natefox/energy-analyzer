@@ -18,9 +18,9 @@ interface BatteryPreset {
 }
 
 const PRESETS: BatteryPreset[] = [
-  { name: "Tesla Powerwall 3", capacityKwh: 13.5, costUsd: 14500, roundTripEfficiency: 0.90 },
-  { name: "Enphase IQ Battery 5P", capacityKwh: 5, costUsd: 7000, roundTripEfficiency: 0.90 },
-  { name: "Enphase IQ Battery 10T", capacityKwh: 10, costUsd: 12000, roundTripEfficiency: 0.90 },
+  { name: "Tesla Powerwall 3", capacityKwh: 13.5, costUsd: 14500, roundTripEfficiency: 0.9 },
+  { name: "Enphase IQ Battery 5P", capacityKwh: 5, costUsd: 7000, roundTripEfficiency: 0.9 },
+  { name: "Enphase IQ Battery 10T", capacityKwh: 10, costUsd: 12000, roundTripEfficiency: 0.9 },
   { name: "Franklin WH aPower", capacityKwh: 13.6, costUsd: 15000, roundTripEfficiency: 0.89 },
 ];
 
@@ -32,7 +32,12 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
   const [useCustom, setUseCustom] = useState(false);
 
   const battery = useCustom
-    ? { name: "Custom", capacityKwh: customCapacity, costUsd: customCost, roundTripEfficiency: customEfficiency / 100 }
+    ? {
+        name: "Custom",
+        capacityKwh: customCapacity,
+        costUsd: customCost,
+        roundTripEfficiency: customEfficiency / 100,
+      }
     : PRESETS[selectedPreset];
 
   const analysis = useMemo(() => {
@@ -73,7 +78,7 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
       if (displaced > 0) {
         // Savings = peak energy displaced * peak rate - charging cost
         const chargedFromSolar = Math.min(solarExcess, displaced / battery.roundTripEfficiency);
-        const chargedFromGrid = (displaced / battery.roundTripEfficiency) - chargedFromSolar;
+        const chargedFromGrid = displaced / battery.roundTripEfficiency - chargedFromSolar;
 
         const peakSavings = displaced * effectivePeakRate;
         const chargingCost = Math.max(0, chargedFromGrid) * cheapestRate;
@@ -123,7 +128,10 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
             {PRESETS.map((preset, i) => (
               <button
                 key={preset.name}
-                onClick={() => { setSelectedPreset(i); setUseCustom(false); }}
+                onClick={() => {
+                  setSelectedPreset(i);
+                  setUseCustom(false);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
                   !useCustom && selectedPreset === i
                     ? "border-emerald-600 bg-emerald-50 text-emerald-700 font-medium"
@@ -151,25 +159,53 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Capacity (kWh)</label>
-              <input type="number" value={customCapacity} onChange={(e) => setCustomCapacity(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm" min={1} step={0.5} />
+              <input
+                type="number"
+                value={customCapacity}
+                onChange={(e) => setCustomCapacity(Number(e.target.value))}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                min={1}
+                step={0.5}
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost (installed)</label>
-              <input type="number" value={customCost} onChange={(e) => setCustomCost(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm" min={0} step={100} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Cost (installed)
+              </label>
+              <input
+                type="number"
+                value={customCost}
+                onChange={(e) => setCustomCost(Number(e.target.value))}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                min={0}
+                step={100}
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Round-trip Efficiency (%)</label>
-              <input type="number" value={customEfficiency} onChange={(e) => setCustomEfficiency(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm" min={50} max={100} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Round-trip Efficiency (%)
+              </label>
+              <input
+                type="number"
+                value={customEfficiency}
+                onChange={(e) => setCustomEfficiency(Number(e.target.value))}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                min={50}
+                max={100}
+              />
             </div>
           </div>
         ) : (
           <div className="flex gap-6 text-sm text-gray-600">
-            <span>Capacity: <strong>{battery.capacityKwh} kWh</strong></span>
-            <span>Cost: <strong>{formatCurrency(battery.costUsd)}</strong></span>
-            <span>Efficiency: <strong>{(battery.roundTripEfficiency * 100).toFixed(0)}%</strong></span>
+            <span>
+              Capacity: <strong>{battery.capacityKwh} kWh</strong>
+            </span>
+            <span>
+              Cost: <strong>{formatCurrency(battery.costUsd)}</strong>
+            </span>
+            <span>
+              Efficiency: <strong>{(battery.roundTripEfficiency * 100).toFixed(0)}%</strong>
+            </span>
           </div>
         )}
 
@@ -188,12 +224,20 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
           <div className="rounded-lg border p-4">
             <p className="text-sm font-medium text-gray-600">Payback Period</p>
             <p className="text-2xl font-bold">
-              {analysis.paybackYears === Infinity ? "N/A" : `${analysis.paybackYears.toFixed(1)} yrs`}
+              {analysis.paybackYears === Infinity
+                ? "N/A"
+                : `${analysis.paybackYears.toFixed(1)} yrs`}
             </p>
             <p className="text-xs text-gray-500">to recover {formatCurrency(battery.costUsd)}</p>
           </div>
-          <div className={`rounded-lg border p-4 ${analysis.roi10Year > 0 ? "border-emerald-100" : "border-red-100"}`}>
-            <p className={`text-sm font-medium ${analysis.roi10Year > 0 ? "text-emerald-600" : "text-red-500"}`}>10-Year ROI</p>
+          <div
+            className={`rounded-lg border p-4 ${analysis.roi10Year > 0 ? "border-emerald-100" : "border-red-100"}`}
+          >
+            <p
+              className={`text-sm font-medium ${analysis.roi10Year > 0 ? "text-emerald-600" : "text-red-500"}`}
+            >
+              10-Year ROI
+            </p>
             <p className="text-2xl font-bold">{analysis.roi10Year.toFixed(0)}%</p>
             <p className="text-xs text-gray-500">
               {analysis.tenYearSavings >= 0
@@ -222,7 +266,10 @@ export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props)
         </div>
 
         <p className="text-xs text-gray-400 pt-2">
-          Estimates assume daily charge/discharge cycle optimized for peak shaving. Actual savings depend on battery degradation, utility NEM policies, time-of-export rates, and usage patterns. Battery costs are approximate installed prices and may vary by region and installer.
+          Estimates assume daily charge/discharge cycle optimized for peak shaving. Actual savings
+          depend on battery degradation, utility NEM policies, time-of-export rates, and usage
+          patterns. Battery costs are approximate installed prices and may vary by region and
+          installer.
         </p>
       </div>
     </div>

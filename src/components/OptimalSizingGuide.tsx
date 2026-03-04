@@ -13,18 +13,15 @@ interface Props {
 
 // Same solar profile as SolarAnalyzer
 const SOLAR_HOURLY_PROFILE = [
-  0, 0, 0, 0, 0, 0,
-  0.02, 0.05, 0.08, 0.11,
-  0.13, 0.14, 0.15, 0.14,
-  0.12, 0.09, 0.05, 0.02,
-  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0.02, 0.05, 0.08, 0.11, 0.13, 0.14, 0.15, 0.14, 0.12, 0.09, 0.05, 0.02, 0, 0, 0,
+  0, 0, 0,
 ];
 
 const COST_PER_WATT_SOLAR = 3.0;
 const PEAK_SUN_HOURS = 5.5;
 const SOLAR_EFFICIENCY = 0.85;
 const SOLAR_DEGRADATION = 0.005;
-const BATTERY_EFFICIENCY = 0.90;
+const BATTERY_EFFICIENCY = 0.9;
 const BATTERY_COST_PER_KWH = 1100; // $/kWh installed (approximate market rate)
 
 // Sweep ranges
@@ -50,7 +47,7 @@ function simulateSystem(
   plugin: UtilityPlugin,
   selectedPlan: RatePlan,
   daysAnalyzed: number,
-  currentAnnualCost: number,
+  currentAnnualCost: number
 ): SizingResult {
   const dailyKwhPerKw = PEAK_SUN_HOURS * SOLAR_EFFICIENCY;
   const usableCapacity = batteryKwh * BATTERY_EFFICIENCY;
@@ -86,7 +83,8 @@ function simulateSystem(
     const exportRate = plugin.nemConfig.nem3ExportRates[season][period] ?? 0;
 
     // Solar production this interval
-    const intervalHours = (record.endTime.getTime() - record.startTime.getTime()) / (1000 * 60 * 60);
+    const intervalHours =
+      (record.endTime.getTime() - record.startTime.getTime()) / (1000 * 60 * 60);
     const solarGen = solarKw * dailyKwhPerKw * SOLAR_HOURLY_PROFILE[hour] * intervalHours;
     totalNewGeneration += solarGen;
 
@@ -129,9 +127,12 @@ function simulateSystem(
 
   const paybackYears = annualSavings > 0 ? systemCost / annualSavings : Infinity;
   const roi25Year = systemCost > 0 ? ((lifetimeSavings - systemCost) / systemCost) * 100 : 0;
-  const selfConsumptionPct = totalNewGeneration > 0
-    ? ((totalSelfConsumed + (totalNewGeneration - totalSelfConsumed - totalExported)) / totalNewGeneration) * 100
-    : 0;
+  const selfConsumptionPct =
+    totalNewGeneration > 0
+      ? ((totalSelfConsumed + (totalNewGeneration - totalSelfConsumed - totalExported)) /
+          totalNewGeneration) *
+        100
+      : 0;
   const annualExportKwh = daysAnalyzed > 0 ? (totalExported / daysAnalyzed) * 365 : 0;
   const billReductionPct = currentAnnualCost > 0 ? (annualSavings / currentAnnualCost) * 100 : 0;
 
@@ -148,19 +149,44 @@ function simulateSystem(
   };
 }
 
-type SortKey = "solarKw" | "batteryKwh" | "systemCost" | "annualSavings" | "paybackYears" | "roi25Year" | "billReductionPct";
+type SortKey =
+  | "solarKw"
+  | "batteryKwh"
+  | "systemCost"
+  | "annualSavings"
+  | "paybackYears"
+  | "roi25Year"
+  | "billReductionPct";
 
 function ResultCard({ title, color, r }: { title: string; color: string; r: SizingResult }) {
   return (
     <div className={`rounded-lg border ${color} p-4`}>
-      <p className={`text-sm font-semibold mb-2 ${color.replace("border-", "text-").replace("100", "700")}`}>{title}</p>
+      <p
+        className={`text-sm font-semibold mb-2 ${color.replace("border-", "text-").replace("100", "700")}`}
+      >
+        {title}
+      </p>
       <div className="space-y-1 text-sm">
-        <p><strong>{r.solarKw} kW solar</strong>{r.batteryKwh > 0 ? ` + ${r.batteryKwh} kWh battery` : " (no battery)"}</p>
-        <p>System cost: <strong>{formatCurrency(r.systemCost)}</strong></p>
-        <p>Annual savings: <strong className="text-emerald-600">{formatCurrency(r.annualSavings)}</strong></p>
-        <p>Payback: <strong>{r.paybackYears.toFixed(1)} years</strong></p>
-        <p>25-year ROI: <strong>{r.roi25Year.toFixed(0)}%</strong></p>
-        <p>Bill reduction: <strong>{r.billReductionPct.toFixed(0)}%</strong></p>
+        <p>
+          <strong>{r.solarKw} kW solar</strong>
+          {r.batteryKwh > 0 ? ` + ${r.batteryKwh} kWh battery` : " (no battery)"}
+        </p>
+        <p>
+          System cost: <strong>{formatCurrency(r.systemCost)}</strong>
+        </p>
+        <p>
+          Annual savings:{" "}
+          <strong className="text-emerald-600">{formatCurrency(r.annualSavings)}</strong>
+        </p>
+        <p>
+          Payback: <strong>{r.paybackYears.toFixed(1)} years</strong>
+        </p>
+        <p>
+          25-year ROI: <strong>{r.roi25Year.toFixed(0)}%</strong>
+        </p>
+        <p>
+          Bill reduction: <strong>{r.billReductionPct.toFixed(0)}%</strong>
+        </p>
       </div>
     </div>
   );
@@ -171,9 +197,8 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
   const [sortAsc, setSortAsc] = useState(true);
 
   const analysis = useMemo(() => {
-    const currentAnnualCost = result.daysAnalyzed > 0
-      ? (result.netCost / result.daysAnalyzed) * 365
-      : 0;
+    const currentAnnualCost =
+      result.daysAnalyzed > 0 ? (result.netCost / result.daysAnalyzed) * 365 : 0;
 
     // Run all combinations
     const allResults: SizingResult[] = [];
@@ -181,21 +206,31 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
       for (const batteryKwh of BATTERY_SIZES) {
         if (solarKw === 0 && batteryKwh === 0) continue;
         allResults.push(
-          simulateSystem(solarKw, batteryKwh, records, plugin, selectedPlan, result.daysAnalyzed, currentAnnualCost)
+          simulateSystem(
+            solarKw,
+            batteryKwh,
+            records,
+            plugin,
+            selectedPlan,
+            result.daysAnalyzed,
+            currentAnnualCost
+          )
         );
       }
     }
 
     // Find best ROI (among options that pay back within 25 years)
     const viable = allResults.filter((r) => r.paybackYears <= 25);
-    const bestRoi = viable.length > 0
-      ? viable.reduce((best, r) => r.roi25Year > best.roi25Year ? r : best)
-      : null;
+    const bestRoi =
+      viable.length > 0
+        ? viable.reduce((best, r) => (r.roi25Year > best.roi25Year ? r : best))
+        : null;
 
     // Find fastest payback
-    const fastestPayback = viable.length > 0
-      ? viable.reduce((best, r) => r.paybackYears < best.paybackYears ? r : best)
-      : null;
+    const fastestPayback =
+      viable.length > 0
+        ? viable.reduce((best, r) => (r.paybackYears < best.paybackYears ? r : best))
+        : null;
 
     // Find max bill reduction
     const maxReduction = allResults.reduce((best, r) =>
@@ -205,24 +240,41 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
     // Solar-only best
     const solarOnly = allResults
       .filter((r) => r.batteryKwh === 0)
-      .reduce((best, r) => r.roi25Year > best.roi25Year ? r : best, allResults.filter((r) => r.batteryKwh === 0)[0]);
+      .reduce(
+        (best, r) => (r.roi25Year > best.roi25Year ? r : best),
+        allResults.filter((r) => r.batteryKwh === 0)[0]
+      );
 
     // Best solar+battery combo
     const withBattery = allResults
       .filter((r) => r.batteryKwh > 0 && r.solarKw > 0)
-      .reduce((best, r) => r.roi25Year > best.roi25Year ? r : best, allResults.filter((r) => r.batteryKwh > 0 && r.solarKw > 0)[0]);
+      .reduce(
+        (best, r) => (r.roi25Year > best.roi25Year ? r : best),
+        allResults.filter((r) => r.batteryKwh > 0 && r.solarKw > 0)[0]
+      );
 
-    return { allResults, bestRoi, fastestPayback, maxReduction, solarOnly, withBattery, currentAnnualCost };
+    return {
+      allResults,
+      bestRoi,
+      fastestPayback,
+      maxReduction,
+      solarOnly,
+      withBattery,
+      currentAnnualCost,
+    };
   }, [result, records, plugin, selectedPlan]);
 
-  const { bestRoi, fastestPayback, maxReduction, solarOnly, withBattery, currentAnnualCost } = analysis;
+  const { bestRoi, fastestPayback, maxReduction, solarOnly, withBattery, currentAnnualCost } =
+    analysis;
 
   if (!bestRoi) {
     return (
       <div className="bg-white rounded-xl shadow-sm border p-5">
         <h3 className="text-lg font-bold">Optimal Solar + Battery Sizing</h3>
         <p className="text-sm text-gray-500 mt-2">
-          Based on your usage data, none of the modeled solar/battery combinations would pay back within 25 years at current rates. This may indicate very low energy usage or already-low rates.
+          Based on your usage data, none of the modeled solar/battery combinations would pay back
+          within 25 years at current rates. This may indicate very low energy usage or already-low
+          rates.
         </p>
       </div>
     );
@@ -233,8 +285,8 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
       <div className="p-5 border-b">
         <h3 className="text-lg font-bold">Optimal Solar + Battery Sizing</h3>
         <p className="text-sm text-gray-500 mt-1">
-          Recommendations based on your actual usage ({result.daysAnalyzed} days). Current annual cost: {formatCurrency(currentAnnualCost)}.
-          All scenarios use NEM 3.0 rates.
+          Recommendations based on your actual usage ({result.daysAnalyzed} days). Current annual
+          cost: {formatCurrency(currentAnnualCost)}. All scenarios use NEM 3.0 rates.
         </p>
       </div>
 
@@ -251,9 +303,12 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
           {withBattery && withBattery !== bestRoi && withBattery !== fastestPayback && (
             <ResultCard title="Best Solar + Battery" color="border-purple-100" r={withBattery} />
           )}
-          {maxReduction && maxReduction !== bestRoi && maxReduction !== fastestPayback && maxReduction.billReductionPct > bestRoi.billReductionPct + 10 && (
-            <ResultCard title="Maximum Savings" color="border-red-100" r={maxReduction} />
-          )}
+          {maxReduction &&
+            maxReduction !== bestRoi &&
+            maxReduction !== fastestPayback &&
+            maxReduction.billReductionPct > bestRoi.billReductionPct + 10 && (
+              <ResultCard title="Maximum Savings" color="border-red-100" r={maxReduction} />
+            )}
         </div>
 
         {/* Key insight */}
@@ -269,32 +324,47 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
           </p>
           {withBattery && withBattery.roi25Year > solarOnly.roi25Year && (
             <p className="text-sm text-emerald-700 mt-2">
-              Adding a {withBattery.batteryKwh} kWh battery improves 25-year ROI from {solarOnly.roi25Year.toFixed(0)}% to {withBattery.roi25Year.toFixed(0)}% by capturing {formatKwh(solarOnly.annualExportKwh - withBattery.annualExportKwh)}/yr of solar that would otherwise be exported at low NEM 3.0 rates.
+              Adding a {withBattery.batteryKwh} kWh battery improves 25-year ROI from{" "}
+              {solarOnly.roi25Year.toFixed(0)}% to {withBattery.roi25Year.toFixed(0)}% by capturing{" "}
+              {formatKwh(solarOnly.annualExportKwh - withBattery.annualExportKwh)}/yr of solar that
+              would otherwise be exported at low NEM 3.0 rates.
             </p>
           )}
         </div>
 
         {/* Comparison table */}
         <details className="text-sm">
-          <summary className="cursor-pointer font-medium text-gray-700">View all combinations</summary>
+          <summary className="cursor-pointer font-medium text-gray-700">
+            View all combinations
+          </summary>
           <div className="overflow-x-auto mt-3">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  {([
-                    ["solarKw", "Solar", false],
-                    ["batteryKwh", "Battery", false],
-                    ["systemCost", "Cost", true],
-                    ["annualSavings", "Annual Savings", true],
-                    ["paybackYears", "Payback", true],
-                    ["roi25Year", "25yr ROI", true],
-                    ["billReductionPct", "Bill %", true],
-                  ] as [SortKey, string, boolean][]).map(([key, label, right]) => (
+                  {(
+                    [
+                      ["solarKw", "Solar", false],
+                      ["batteryKwh", "Battery", false],
+                      ["systemCost", "Cost", true],
+                      ["annualSavings", "Annual Savings", true],
+                      ["paybackYears", "Payback", true],
+                      ["roi25Year", "25yr ROI", true],
+                      ["billReductionPct", "Bill %", true],
+                    ] as [SortKey, string, boolean][]
+                  ).map(([key, label, right]) => (
                     <th
                       key={key}
                       onClick={() => {
                         if (sortKey === key) setSortAsc(!sortAsc);
-                        else { setSortKey(key); setSortAsc(key === "paybackYears" || key === "systemCost" || key === "solarKw" || key === "batteryKwh"); }
+                        else {
+                          setSortKey(key);
+                          setSortAsc(
+                            key === "paybackYears" ||
+                              key === "systemCost" ||
+                              key === "solarKw" ||
+                              key === "batteryKwh"
+                          );
+                        }
                       }}
                       className={`px-3 py-2 font-semibold text-gray-600 text-xs cursor-pointer select-none hover:text-gray-900 ${right ? "text-right" : ""}`}
                     >
@@ -306,17 +376,31 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
               <tbody>
                 {[...analysis.allResults]
                   .sort((a, b) => {
-                    const av = a[sortKey], bv = b[sortKey];
-                    return sortAsc ? (av as number) - (bv as number) : (bv as number) - (av as number);
+                    const av = a[sortKey],
+                      bv = b[sortKey];
+                    return sortAsc
+                      ? (av as number) - (bv as number)
+                      : (bv as number) - (av as number);
                   })
                   .map((r, i) => (
-                    <tr key={`${r.solarKw}-${r.batteryKwh}`} className={`border-t ${r === bestRoi ? "bg-emerald-50" : i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                    <tr
+                      key={`${r.solarKw}-${r.batteryKwh}`}
+                      className={`border-t ${r === bestRoi ? "bg-emerald-50" : i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
+                    >
                       <td className="px-3 py-2">{r.solarKw} kW</td>
-                      <td className="px-3 py-2">{r.batteryKwh > 0 ? `${r.batteryKwh} kWh` : "—"}</td>
+                      <td className="px-3 py-2">
+                        {r.batteryKwh > 0 ? `${r.batteryKwh} kWh` : "—"}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatCurrency(r.systemCost)}</td>
-                      <td className="px-3 py-2 text-right text-emerald-600">{formatCurrency(r.annualSavings)}</td>
-                      <td className="px-3 py-2 text-right">{r.paybackYears < 100 ? `${r.paybackYears.toFixed(1)} yr` : "N/A"}</td>
-                      <td className="px-3 py-2 text-right font-semibold">{r.roi25Year.toFixed(0)}%</td>
+                      <td className="px-3 py-2 text-right text-emerald-600">
+                        {formatCurrency(r.annualSavings)}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {r.paybackYears < 100 ? `${r.paybackYears.toFixed(1)} yr` : "N/A"}
+                      </td>
+                      <td className="px-3 py-2 text-right font-semibold">
+                        {r.roi25Year.toFixed(0)}%
+                      </td>
                       <td className="px-3 py-2 text-right">{r.billReductionPct.toFixed(0)}%</td>
                     </tr>
                   ))}
@@ -326,7 +410,12 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
         </details>
 
         <p className="text-xs text-gray-400 pt-2">
-          Estimates use $3.00/W solar, ${BATTERY_COST_PER_KWH}/kWh battery (installed), {PEAK_SUN_HOURS} peak sun hours, {(SOLAR_EFFICIENCY * 100).toFixed(0)}% system efficiency, {(BATTERY_EFFICIENCY * 100).toFixed(0)}% battery round-trip efficiency, and {(SOLAR_DEGRADATION * 100).toFixed(1)}%/yr degradation. NEM 3.0 export rates applied. Actual results vary by location, roof orientation, shading, installer pricing, and utility rate changes.
+          Estimates use $3.00/W solar, ${BATTERY_COST_PER_KWH}/kWh battery (installed),{" "}
+          {PEAK_SUN_HOURS} peak sun hours, {(SOLAR_EFFICIENCY * 100).toFixed(0)}% system efficiency,{" "}
+          {(BATTERY_EFFICIENCY * 100).toFixed(0)}% battery round-trip efficiency, and{" "}
+          {(SOLAR_DEGRADATION * 100).toFixed(1)}%/yr degradation. NEM 3.0 export rates applied.
+          Actual results vary by location, roof orientation, shading, installer pricing, and utility
+          rate changes.
         </p>
       </div>
     </div>

@@ -10,6 +10,8 @@ Client-side Next.js app that compares utility rate plans and analyzes energy usa
 - `npm run build` — Production build (static export to `out/`)
 - `npm test` — Run all tests (Jest, 42 unit tests + 12 integration tests that auto-skip without CSV files)
 - `npx jest path/to/test.ts` — Run a specific test file
+- `npm run format` — Format all source files with Prettier
+- `npm run format:check` — Check formatting without modifying files
 
 ## Tech Stack
 
@@ -19,6 +21,7 @@ Client-side Next.js app that compares utility rate plans and analyzes energy usa
 - **Charts:** Recharts v3
 - **CSV Parsing:** Papa Parse
 - **Testing:** Jest with ts-jest
+- **Formatting:** Prettier with pre-commit hook (`.githooks/pre-commit`)
 
 ## Architecture
 
@@ -135,8 +138,9 @@ Plugins are registered in `src/lib/registry.ts`. To add a new utility, create it
 - `basePath` is `/energy-analyzer` in production only (env-conditional in next.config.ts) — dev runs at `/`
 - GitHub Pages auto-deploys from main via `.github/workflows/deploy.yml`
 - Live site: https://natefox.github.io/energy-analyzer/
-- Docker: `docker compose up` or pull from `ghcr.io/natefox/energy-analyzer`
+- Docker: `docker compose up` pulls from `ghcr.io/natefox/energy-analyzer:main` by default; uncomment `build: .` in docker-compose.yml for local builds
 - Integration tests skip gracefully when CSV data files are absent (CI-safe)
+- Prettier formats all source files; pre-commit hook in `.githooks/pre-commit` auto-formats staged files
 - Feature work done in git worktrees under `.worktrees/` directory
 
 ## Design Doc

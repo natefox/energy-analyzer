@@ -162,8 +162,7 @@ export const scePlans: RatePlan[] = [
   {
     id: "TOU-D-PRIME",
     name: "TOU-D-PRIME",
-    description:
-      "Best for EV, battery storage, or heat pump owners. Lowest off-peak rates.",
+    description: "Best for EV, battery storage, or heat pump owners. Lowest off-peak rates.",
     eligibility: "Requires EV, battery storage, or heat pump",
     monthlyCharge: 24.15,
     seasons: {

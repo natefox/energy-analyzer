@@ -3,7 +3,10 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { formatKwh } from "@/lib/utils";
 
-interface Props { weekdayProfile: number[]; weekendProfile: number[]; }
+interface Props {
+  weekdayProfile: number[];
+  weekendProfile: number[];
+}
 
 export default function HourlyDistributionChart({ weekdayProfile, weekendProfile }: Props) {
   const data = Array.from({ length: 24 }, (_, i) => ({
@@ -18,9 +21,22 @@ export default function HourlyDistributionChart({ weekdayProfile, weekendProfile
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <XAxis dataKey="hour" tick={{ fontSize: 10 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(2)}`}
-            label={{ value: "Avg kWh", angle: -90, position: "insideLeft", style: { fontSize: 12 } }} />
-          <Tooltip formatter={(value, name) => [formatKwh(Number(value)), name === "weekday" ? "Weekday Avg" : "Weekend Avg"]} />
+          <YAxis
+            tick={{ fontSize: 11 }}
+            tickFormatter={(v) => `${v.toFixed(2)}`}
+            label={{
+              value: "Avg kWh",
+              angle: -90,
+              position: "insideLeft",
+              style: { fontSize: 12 },
+            }}
+          />
+          <Tooltip
+            formatter={(value, name) => [
+              formatKwh(Number(value)),
+              name === "weekday" ? "Weekday Avg" : "Weekend Avg",
+            ]}
+          />
           <Legend />
           <Bar dataKey="weekday" name="Weekday" fill="#3b82f6" />
           <Bar dataKey="weekend" name="Weekend" fill="#8b5cf6" />

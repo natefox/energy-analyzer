@@ -3,16 +3,12 @@ import type { IntervalRecord } from "@/lib/types";
 
 export function detectCsv(text: string): boolean {
   const lines = text.split("\n").slice(0, 20);
-  return lines.some((line) =>
-    line.includes("Energy Consumption time Period Start")
-  );
+  return lines.some((line) => line.includes("Energy Consumption time Period Start"));
 }
 
 function parseSceDateTime(datetimeStr: string): Date {
   const cleaned = datetimeStr.replace(/"/g, "").trim();
-  const match = cleaned.match(
-    /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{1,2}):(\d{2})(AM|PM)$/i
-  );
+  const match = cleaned.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{1,2}):(\d{2})(AM|PM)$/i);
   if (!match) throw new Error(`Invalid SCE datetime: ${datetimeStr}`);
   const month = parseInt(match[1], 10);
   const day = parseInt(match[2], 10);
@@ -34,8 +30,7 @@ export function parseCsv(text: string): IntervalRecord[] {
       break;
     }
   }
-  if (headerIndex === -1)
-    throw new Error("Could not find SCE CSV header row");
+  if (headerIndex === -1) throw new Error("Could not find SCE CSV header row");
 
   const csvContent = lines.slice(headerIndex).join("\n");
   const parsed = Papa.parse(csvContent, {
@@ -46,25 +41,15 @@ export function parseCsv(text: string): IntervalRecord[] {
 
   const records: IntervalRecord[] = [];
   for (const row of parsed.data as Record<string, string>[]) {
-    const startStr =
-      row["Energy Consumption time Period Start"]?.trim();
-    const endStr =
-      row["Energy Consumption time Period End"]?.trim();
-    const delivered = parseFloat(
-      (row["Delivered"] || "0").replace(/"/g, "").trim()
-    );
-    const received = parseFloat(
-      (row["Received"] || "0").replace(/"/g, "").trim()
-    );
+    const startStr = row["Energy Consumption time Period Start"]?.trim();
+    const endStr = row["Energy Consumption time Period End"]?.trim();
+    const delivered = parseFloat((row["Delivered"] || "0").replace(/"/g, "").trim());
+    const received = parseFloat((row["Received"] || "0").replace(/"/g, "").trim());
     if (!startStr || !endStr) continue;
     const startTime = parseSceDateTime(startStr);
     const endTime = parseSceDateTime(endStr);
     records.push({
-      date: new Date(
-        startTime.getFullYear(),
-        startTime.getMonth(),
-        startTime.getDate()
-      ),
+      date: new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate()),
       startTime,
       endTime,
       consumption: delivered,

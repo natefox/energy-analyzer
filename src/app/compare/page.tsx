@@ -16,7 +16,9 @@ export default function ComparePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Compare Rate Plans</h1>
-        <p className="text-gray-600 mt-1">Select your utility provider, then compare plans side by side</p>
+        <p className="text-gray-600 mt-1">
+          Select your utility provider, then compare plans side by side
+        </p>
       </div>
 
       {/* Prominent utility selector */}
