@@ -59,7 +59,8 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId, n
       <div className="p-5 border-b">
         <h3 className="text-lg font-bold">Rate Plan Comparison</h3>
         <p className="text-sm text-gray-500 mt-1">
-          All {plugin.shortName} plans calculated using your actual usage data, sorted by {hasExportCredits ? "net" : "total"} cost
+          All {plugin.shortName} plans calculated using your actual usage data, sorted by{" "}
+          {hasExportCredits ? "net" : "total"} cost
           {hasExportCredits && ` (${nemTier} export credits applied)`}
         </p>
       </div>
@@ -71,21 +72,41 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId, n
               <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs">Rate Plan</th>
               {hasExportCredits ? (
                 <>
-                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Grid Cost</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Export Credit</th>
-                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Net Cost</th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                    Grid Cost
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                    Export Credit
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                    Net Cost
+                  </th>
                 </>
               ) : (
-                <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Total Cost</th>
+                <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                  Total Cost
+                </th>
               )}
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Daily Avg</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Peak</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Off-Peak</th>
+              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                Daily Avg
+              </th>
+              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                Peak
+              </th>
+              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                Off-Peak
+              </th>
               {hasMidPeak && (
-                <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Mid-Peak</th>
+                <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                  Mid-Peak
+                </th>
               )}
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Super Off-Peak</th>
-              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">Comparison</th>
+              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                Super Off-Peak
+              </th>
+              <th className="px-4 py-3 font-semibold text-gray-600 uppercase text-xs text-right">
+                Comparison
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -117,11 +138,17 @@ export default function PlanComparisonTable({ records, plugin, selectedPlanId, n
                   {hasExportCredits ? (
                     <>
                       <td className="px-4 py-4 text-right">{formatCurrency(r.totalCost)}</td>
-                      <td className="px-4 py-4 text-right text-green-600">-{formatCurrency(r.exportCredit)}</td>
-                      <td className="px-4 py-4 text-right font-semibold">{formatCurrency(r.netCost)}</td>
+                      <td className="px-4 py-4 text-right text-green-600">
+                        -{formatCurrency(r.exportCredit)}
+                      </td>
+                      <td className="px-4 py-4 text-right font-semibold">
+                        {formatCurrency(r.netCost)}
+                      </td>
                     </>
                   ) : (
-                    <td className="px-4 py-4 text-right font-semibold">{formatCurrency(r.totalCost)}</td>
+                    <td className="px-4 py-4 text-right font-semibold">
+                      {formatCurrency(r.totalCost)}
+                    </td>
                   )}
                   <td className="px-4 py-4 text-right">{formatCurrency(r.dailyAvg)}</td>
                   <td className="px-4 py-4 text-right">{formatCurrency(r.peakCost)}</td>

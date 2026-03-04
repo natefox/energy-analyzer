@@ -4,10 +4,7 @@ import type { IntervalRecord } from "@/lib/types";
 export function detectCsv(text: string): boolean {
   const lines = text.split("\n").slice(0, 20);
   return lines.some(
-    (line) =>
-      line.includes("Meter Number") &&
-      line.includes("Date") &&
-      line.includes("Start Time")
+    (line) => line.includes("Meter Number") && line.includes("Date") && line.includes("Start Time")
   );
 }
 
@@ -36,8 +33,7 @@ export function parseCsv(text: string): IntervalRecord[] {
       break;
     }
   }
-  if (headerIndex === -1)
-    throw new Error("Could not find SDGE CSV header row");
+  if (headerIndex === -1) throw new Error("Could not find SDGE CSV header row");
 
   const csvContent = lines.slice(headerIndex).join("\n");
   const parsed = Papa.parse(csvContent, {
@@ -57,11 +53,7 @@ export function parseCsv(text: string): IntervalRecord[] {
     const startTime = parseTime(date, startTimeStr);
     const endTime = new Date(startTime.getTime() + 15 * 60 * 1000);
     records.push({
-      date: new Date(
-        startTime.getFullYear(),
-        startTime.getMonth(),
-        startTime.getDate()
-      ),
+      date: new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate()),
       startTime,
       endTime,
       consumption,

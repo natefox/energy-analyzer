@@ -44,8 +44,7 @@ export function calculateCosts(
     const month = record.startTime.getMonth() + 1;
     const season = plugin.getSeason(month);
     const period = plugin.classifyInterval(record.startTime, hour);
-    const isWeekend =
-      record.startTime.getDay() === 0 || record.startTime.getDay() === 6;
+    const isWeekend = record.startTime.getDay() === 0 || record.startTime.getDay() === 6;
 
     const seasonRates = plan.seasons[season];
     const periodRate = seasonRates.periods[period];
@@ -112,23 +111,15 @@ export function calculateCosts(
     }
   }
 
-  const dailyData = Array.from(dailyMap.values()).sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
+  const dailyData = Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
   const daysAnalyzed = dailyData.length;
   const dailyCharge = plan.monthlyCharge / 30;
   const totalFixedCharge = dailyCharge * daysAnalyzed;
   const totalUsageCost = dailyData.reduce((sum, d) => sum + d.totalCost, 0);
   const totalCost = totalUsageCost + totalFixedCharge;
   const totalUsage = dailyData.reduce((sum, d) => sum + d.totalUsage, 0);
-  const totalGeneration = dailyData.reduce(
-    (sum, d) => sum + d.totalGeneration,
-    0
-  );
-  const totalExportCredit = dailyData.reduce(
-    (sum, d) => sum + d.exportCredit,
-    0
-  );
+  const totalGeneration = dailyData.reduce((sum, d) => sum + d.totalGeneration, 0);
+  const totalExportCredit = dailyData.reduce((sum, d) => sum + d.exportCredit, 0);
   const netCost = totalCost - totalExportCredit;
 
   const weekdayProfile = hourlyWeekday.map((total, i) =>
@@ -169,18 +160,14 @@ export function calculatePlanComparison(
   const peakKwh = monthlyKwh * (peakPercent / 100);
   const remainingKwh = monthlyKwh - peakKwh;
 
-  const peakPeriod = periods.find(
-    ([key]) => key === "peak" || key === "midPeak"
-  );
+  const peakPeriod = periods.find(([key]) => key === "peak" || key === "midPeak");
   const offPeakPeriod = periods.find(([key]) => key === "offPeak");
   const superOffPeakPeriod = periods.find(([key]) => key === "superOffPeak");
 
   let cost = 0;
   const getEffectiveRate = (periodRate: { rate: number; fees?: number }) => {
     const rate = periodRate.rate + (periodRate.fees || 0);
-    return plan.baselineCredit
-      ? Math.max(0, rate - plan.baselineCredit)
-      : rate;
+    return plan.baselineCredit ? Math.max(0, rate - plan.baselineCredit) : rate;
   };
 
   if (peakPeriod) cost += peakKwh * getEffectiveRate(peakPeriod[1]);

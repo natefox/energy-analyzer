@@ -1,5 +1,6 @@
 services:
   app:
-    build: .
+    image: ghcr.io/natefox/energy-analyzer:main
+    # build: .  # uncomment to build and run a local test version
     ports:
       - "8080:8080"

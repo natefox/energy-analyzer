@@ -8,10 +8,26 @@ import UsageDashboard from "@/components/UsageDashboard";
 import { calculateCosts } from "@/lib/calculator";
 
 const NEM_OPTIONS: { value: NemTier; label: string; description: string }[] = [
-  { value: "none", label: "No Solar / No NEM", description: "Standard billing without solar export credits" },
-  { value: "NEM1", label: "NEM 1.0", description: "Full retail rate credit for exports (legacy, grandfathered)" },
-  { value: "NEM2", label: "NEM 2.0", description: "Retail rate minus non-bypassable charges (~$0.02-0.03/kWh less)" },
-  { value: "NEM3", label: "NEM 3.0 (Net Billing)", description: "Time-varying avoided cost export rates (significantly lower)" },
+  {
+    value: "none",
+    label: "No Solar / No NEM",
+    description: "Standard billing without solar export credits",
+  },
+  {
+    value: "NEM1",
+    label: "NEM 1.0",
+    description: "Full retail rate credit for exports (legacy, grandfathered)",
+  },
+  {
+    value: "NEM2",
+    label: "NEM 2.0",
+    description: "Retail rate minus non-bypassable charges (~$0.02-0.03/kWh less)",
+  },
+  {
+    value: "NEM3",
+    label: "NEM 3.0 (Net Billing)",
+    description: "Time-varying avoided cost export rates (significantly lower)",
+  },
 ];
 
 export default function AnalyzePage() {
@@ -44,19 +60,29 @@ export default function AnalyzePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Analyze Your Energy Usage</h1>
-        <p className="text-gray-600 mt-1">Upload your utility CSV file to see detailed usage and cost breakdowns</p>
+        <p className="text-gray-600 mt-1">
+          Upload your utility CSV file to see detailed usage and cost breakdowns
+        </p>
       </div>
       <details className="bg-white rounded-xl p-6 shadow-sm border">
-        <summary className="cursor-pointer font-medium text-gray-700">How to download your usage data</summary>
+        <summary className="cursor-pointer font-medium text-gray-700">
+          How to download your usage data
+        </summary>
         <div className="mt-4 space-y-6">
           {plugins.map((p) => (
             <div key={p.id}>
               <h3 className="font-semibold text-gray-800">{p.name}</h3>
               <ol className="mt-2 list-decimal list-inside text-sm text-gray-600 space-y-1">
-                {p.downloadInstructions.map((step, i) => <li key={i}>{step}</li>)}
+                {p.downloadInstructions.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
               </ol>
-              <a href={p.downloadUrl} target="_blank" rel="noopener noreferrer"
-                className="inline-block mt-2 text-sm text-emerald-600 hover:underline">
+              <a
+                href={p.downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 text-sm text-emerald-600 hover:underline"
+              >
                 Go to {p.shortName} My Account &rarr;
               </a>
             </div>
@@ -68,18 +94,30 @@ export default function AnalyzePage() {
         <div className="bg-white rounded-xl p-4 shadow-sm border flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-gray-700">Rate Plan:</label>
-            <select value={selectedPlanId} onChange={(e) => setSelectedPlanId(e.target.value)}
-              className="border rounded-lg px-3 py-1.5 text-sm">
-              {plugin.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            <select
+              value={selectedPlanId}
+              onChange={(e) => setSelectedPlanId(e.target.value)}
+              className="border rounded-lg px-3 py-1.5 text-sm"
+            >
+              {plugin.plans.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </div>
           {hasSolar && (
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700">NEM Tier:</label>
-              <select value={nemTier} onChange={(e) => setNemTier(e.target.value as NemTier)}
-                className="border rounded-lg px-3 py-1.5 text-sm">
+              <select
+                value={nemTier}
+                onChange={(e) => setNemTier(e.target.value as NemTier)}
+                className="border rounded-lg px-3 py-1.5 text-sm"
+              >
                 {NEM_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -91,12 +129,20 @@ export default function AnalyzePage() {
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
           <strong>{NEM_OPTIONS.find((o) => o.value === nemTier)?.label}:</strong>{" "}
           {NEM_OPTIONS.find((o) => o.value === nemTier)?.description}.
-          {nemTier === "NEM3" && " Export credits are significantly lower than retail rates — battery storage becomes more valuable."}
-          {nemTier === "NEM1" && " This legacy program is no longer available to new customers but existing customers may be grandfathered in."}
+          {nemTier === "NEM3" &&
+            " Export credits are significantly lower than retail rates — battery storage becomes more valuable."}
+          {nemTier === "NEM1" &&
+            " This legacy program is no longer available to new customers but existing customers may be grandfathered in."}
         </div>
       )}
       {result && plugin && selectedPlan && records && (
-        <UsageDashboard result={result} plugin={plugin} selectedPlan={selectedPlan} records={records} nemTier={nemTier} />
+        <UsageDashboard
+          result={result}
+          plugin={plugin}
+          selectedPlan={selectedPlan}
+          records={records}
+          nemTier={nemTier}
+        />
       )}
     </div>
   );

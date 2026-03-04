@@ -23,7 +23,10 @@ export default function CsvUploader({ onDataLoaded }: CsvUploaderProps) {
       }
       try {
         const records = plugin.parseCsv(text);
-        if (records.length === 0) { setError("No usage data found in the file."); return; }
+        if (records.length === 0) {
+          setError("No usage data found in the file.");
+          return;
+        }
         onDataLoaded(records, plugin);
       } catch (e) {
         setError(`Error parsing CSV: ${(e as Error).message}`);
@@ -54,7 +57,10 @@ export default function CsvUploader({ onDataLoaded }: CsvUploaderProps) {
   return (
     <div className="space-y-4">
       <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -64,26 +70,43 @@ export default function CsvUploader({ onDataLoaded }: CsvUploaderProps) {
         <p className="text-gray-600 mb-2">Drag & drop your CSV file here, or</p>
         <label className="inline-block cursor-pointer bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
           Browse Files
-          <input type="file" accept=".csv" className="hidden"
-            onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }}
+          <input
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+            }}
           />
         </label>
         <p className="text-sm text-gray-400 mt-2">Supports SDG&E and SCE CSV formats</p>
       </div>
       <details className="group">
-        <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">Or paste CSV data directly</summary>
+        <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
+          Or paste CSV data directly
+        </summary>
         <div className="mt-2 space-y-2">
-          <textarea value={pasteText} onChange={(e) => setPasteText(e.target.value)}
+          <textarea
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
             placeholder="Paste your CSV data here..."
             className="w-full h-32 p-3 border border-gray-300 rounded-lg text-sm font-mono resize-y"
           />
-          <button onClick={() => processText(pasteText)} disabled={!pasteText.trim()}
-            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <button
+            onClick={() => processText(pasteText)}
+            disabled={!pasteText.trim()}
+            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
             Analyze Data
           </button>
         </div>
       </details>
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

@@ -40,7 +40,15 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
         offPeakCost: acc.offPeakCost + d.offPeakCost,
         superOffPeakCost: acc.superOffPeakCost + d.superOffPeakCost,
       }),
-      { peakUsage: 0, offPeakUsage: 0, superOffPeakUsage: 0, midPeakUsage: 0, peakCost: 0, offPeakCost: 0, superOffPeakCost: 0 }
+      {
+        peakUsage: 0,
+        offPeakUsage: 0,
+        superOffPeakUsage: 0,
+        midPeakUsage: 0,
+        peakCost: 0,
+        offPeakCost: 0,
+        superOffPeakCost: 0,
+      }
     );
     const peakPct = result.totalUsage > 0 ? (totals.peakUsage / result.totalUsage) * 100 : 0;
 
@@ -51,7 +59,8 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
     });
     planCosts.sort((a, b) => a.cost - b.cost);
     const cheapest = planCosts[0];
-    const currentCost = planCosts.find((p) => p.plan.id === selectedPlan.id)?.cost ?? result.netCost;
+    const currentCost =
+      planCosts.find((p) => p.plan.id === selectedPlan.id)?.cost ?? result.netCost;
 
     if (cheapest && cheapest.plan.id !== selectedPlan.id) {
       const savings = currentCost - cheapest.cost;
@@ -68,9 +77,12 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
 
     // --- Peak usage advice ---
     if (peakPct > 30) {
-      const peakPeriod = selectedPlan.seasons.summer.periods["peak"] || selectedPlan.seasons.winter.periods["peak"];
+      const peakPeriod =
+        selectedPlan.seasons.summer.periods["peak"] || selectedPlan.seasons.winter.periods["peak"];
       const peakHours = peakPeriod?.hours?.weekday?.[0];
-      const peakWindow = peakHours ? `${formatHour(peakHours.start)}-${formatHour(peakHours.end)}` : "peak hours";
+      const peakWindow = peakHours
+        ? `${formatHour(peakHours.start)}-${formatHour(peakHours.end)}`
+        : "peak hours";
 
       // Estimate savings if 20% of peak shifted to off-peak
       const shiftableKwh = totals.peakUsage * 0.2;
@@ -82,14 +94,20 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
         icon: "\u{23F0}",
         title: `Shift usage away from ${peakWindow}`,
         detail: `${peakPct.toFixed(0)}% of your energy is consumed during peak hours, which are the most expensive. Run dishwashers, laundry, and EV charging outside this window.`,
-        impact: shiftSavings > 1 ? `Shifting just 20% could save ~${formatCurrency(shiftSavings)} over this period` : undefined,
+        impact:
+          shiftSavings > 1
+            ? `Shifting just 20% could save ~${formatCurrency(shiftSavings)} over this period`
+            : undefined,
       });
     }
 
     // --- Highest usage hours ---
-    const combined = result.hourlyProfile.weekday.map((v, i) => v + result.hourlyProfile.weekend[i]);
+    const combined = result.hourlyProfile.weekday.map(
+      (v, i) => v + result.hourlyProfile.weekend[i]
+    );
     const maxHourIdx = combined.indexOf(Math.max(...combined));
-    const maxHourAvg = (result.hourlyProfile.weekday[maxHourIdx] + result.hourlyProfile.weekend[maxHourIdx]) / 2;
+    const maxHourAvg =
+      (result.hourlyProfile.weekday[maxHourIdx] + result.hourlyProfile.weekend[maxHourIdx]) / 2;
     const period = plugin.classifyInterval(new Date(2024, 6, 1, maxHourIdx), maxHourIdx); // summer weekday
 
     if (period === "peak" || period === "midPeak") {
@@ -133,7 +151,7 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
           genCounts[h]++;
         }
       }
-      const avgGen = genByHour.map((total, i) => genCounts[i] > 0 ? total / genCounts[i] : 0);
+      const avgGen = genByHour.map((total, i) => (genCounts[i] > 0 ? total / genCounts[i] : 0));
       const peakGenHour = avgGen.indexOf(Math.max(...avgGen));
 
       // Find hours with best solar
@@ -172,7 +190,8 @@ export default function UsageAdvice({ result, records, plugin, selectedPlan }: P
     }
 
     // --- Super off-peak underutilization ---
-    const superOffPeakPct = result.totalUsage > 0 ? (totals.superOffPeakUsage / result.totalUsage) * 100 : 0;
+    const superOffPeakPct =
+      result.totalUsage > 0 ? (totals.superOffPeakUsage / result.totalUsage) * 100 : 0;
     if (superOffPeakPct < 15 && totals.superOffPeakUsage > 0) {
       advice.push({
         icon: "\u{1F319}",

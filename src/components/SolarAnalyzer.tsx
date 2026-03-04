@@ -13,11 +13,30 @@ interface Props {
 
 // Typical SoCal hourly solar production as fraction of daily total
 const SOLAR_HOURLY_PROFILE = [
-  0, 0, 0, 0, 0, 0,       // 12am-5am
-  0.02, 0.05, 0.08, 0.11, // 6am-9am
-  0.13, 0.14, 0.15, 0.14, // 10am-1pm
-  0.12, 0.09, 0.05, 0.02, // 2pm-5pm
-  0, 0, 0, 0, 0, 0,       // 6pm-11pm
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // 12am-5am
+  0.02,
+  0.05,
+  0.08,
+  0.11, // 6am-9am
+  0.13,
+  0.14,
+  0.15,
+  0.14, // 10am-1pm
+  0.12,
+  0.09,
+  0.05,
+  0.02, // 2pm-5pm
+  0,
+  0,
+  0,
+  0,
+  0,
+  0, // 6pm-11pm
 ];
 
 const SYSTEM_SIZES = [
@@ -67,7 +86,8 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
 
       // New solar production for this interval
       const hourlyFraction = SOLAR_HOURLY_PROFILE[hour];
-      const intervalHours = (record.endTime.getTime() - record.startTime.getTime()) / (1000 * 60 * 60);
+      const intervalHours =
+        (record.endTime.getTime() - record.startTime.getTime()) / (1000 * 60 * 60);
       const newGenKwh = activeKw * dailyKwhPerKw * hourlyFraction * intervalHours;
       totalNewGeneration += newGenKwh;
 
@@ -100,9 +120,7 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
 
     const systemCost = activeKw * 1000 * COST_PER_WATT;
 
-    const annualSavings = result.daysAnalyzed > 0
-      ? (totalSavings / result.daysAnalyzed) * 365
-      : 0;
+    const annualSavings = result.daysAnalyzed > 0 ? (totalSavings / result.daysAnalyzed) * 365 : 0;
 
     // Calculate 25-year lifetime savings with degradation
     let lifetimeSavings = 0;
@@ -112,7 +130,8 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
 
     const paybackYears = annualSavings > 0 ? systemCost / annualSavings : Infinity;
     const roi25Year = systemCost > 0 ? ((lifetimeSavings - systemCost) / systemCost) * 100 : 0;
-    const selfConsumptionPct = totalNewGeneration > 0 ? (totalSelfConsumed / totalNewGeneration) * 100 : 0;
+    const selfConsumptionPct =
+      totalNewGeneration > 0 ? (totalSelfConsumed / totalNewGeneration) * 100 : 0;
     const monthlySavings = annualSavings / 12;
 
     return {
@@ -155,7 +174,10 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
             {SYSTEM_SIZES.map((size) => (
               <button
                 key={size.kw}
-                onClick={() => { setSystemKw(size.kw); setUseCustom(false); }}
+                onClick={() => {
+                  setSystemKw(size.kw);
+                  setUseCustom(false);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
                   !useCustom && systemKw === size.kw
                     ? "border-yellow-500 bg-yellow-50 text-yellow-700 font-medium"
@@ -182,9 +204,13 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
           <div className="max-w-xs">
             <label className="block text-sm font-medium text-gray-700 mb-1">System Size (kW)</label>
             <input
-              type="number" value={customKw}
+              type="number"
+              value={customKw}
               onChange={(e) => setCustomKw(Number(e.target.value))}
-              className="w-full border rounded-lg px-3 py-2 text-sm" min={1} max={50} step={0.5}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+              min={1}
+              max={50}
+              step={0.5}
             />
           </div>
         )}
@@ -192,7 +218,8 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
         {/* Production estimate */}
         <div className="text-sm">
           <span className="text-gray-600">
-            Estimated production: <strong>{formatKwh(analysis.dailyKwhPerKw * activeKw)}/day</strong>
+            Estimated production:{" "}
+            <strong>{formatKwh(analysis.dailyKwhPerKw * activeKw)}/day</strong>
           </span>
         </div>
 
@@ -211,12 +238,22 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
           <div className="rounded-lg border p-4">
             <p className="text-sm font-medium text-gray-600">Payback Period</p>
             <p className="text-2xl font-bold">
-              {analysis.paybackYears === Infinity ? "N/A" : `${analysis.paybackYears.toFixed(1)} yrs`}
+              {analysis.paybackYears === Infinity
+                ? "N/A"
+                : `${analysis.paybackYears.toFixed(1)} yrs`}
             </p>
-            <p className="text-xs text-gray-500">to recover {formatCurrency(analysis.systemCost)}</p>
+            <p className="text-xs text-gray-500">
+              to recover {formatCurrency(analysis.systemCost)}
+            </p>
           </div>
-          <div className={`rounded-lg border p-4 ${analysis.roi25Year > 0 ? "border-emerald-100" : "border-red-100"}`}>
-            <p className={`text-sm font-medium ${analysis.roi25Year > 0 ? "text-emerald-600" : "text-red-500"}`}>25-Year ROI</p>
+          <div
+            className={`rounded-lg border p-4 ${analysis.roi25Year > 0 ? "border-emerald-100" : "border-red-100"}`}
+          >
+            <p
+              className={`text-sm font-medium ${analysis.roi25Year > 0 ? "text-emerald-600" : "text-red-500"}`}
+            >
+              25-Year ROI
+            </p>
             <p className="text-2xl font-bold">{analysis.roi25Year.toFixed(0)}%</p>
             <p className="text-xs text-gray-500">
               {analysis.lifetimeSavings - analysis.systemCost >= 0
@@ -248,7 +285,11 @@ export default function SolarAnalyzer({ result, records, plugin, selectedPlan }:
         </div>
 
         <p className="text-xs text-gray-400 pt-2">
-          Estimates use ${COST_PER_WATT.toFixed(2)}/W installed cost, {PEAK_SUN_HOURS} peak sun hours/day (SoCal avg), {(SYSTEM_EFFICIENCY * 100).toFixed(0)}% system efficiency, and {(ANNUAL_DEGRADATION * 100).toFixed(1)}% annual degradation. New solar installations are on NEM 3.0 (Net Billing Tariff). Actual costs and production vary by location, roof orientation, shading, and installer.
+          Estimates use ${COST_PER_WATT.toFixed(2)}/W installed cost, {PEAK_SUN_HOURS} peak sun
+          hours/day (SoCal avg), {(SYSTEM_EFFICIENCY * 100).toFixed(0)}% system efficiency, and{" "}
+          {(ANNUAL_DEGRADATION * 100).toFixed(1)}% annual degradation. New solar installations are
+          on NEM 3.0 (Net Billing Tariff). Actual costs and production vary by location, roof
+          orientation, shading, and installer.
         </p>
       </div>
     </div>

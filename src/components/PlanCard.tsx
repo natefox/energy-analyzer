@@ -3,7 +3,11 @@
 import type { RatePlan } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
-interface Props { plan: RatePlan; season: "summer" | "winter"; monthlyCost: number; }
+interface Props {
+  plan: RatePlan;
+  season: "summer" | "winter";
+  monthlyCost: number;
+}
 
 export default function PlanCard({ plan, season, monthlyCost }: Props) {
   const seasonRates = plan.seasons[season];
@@ -19,7 +23,11 @@ export default function PlanCard({ plan, season, monthlyCost }: Props) {
             <span className="text-gray-600">{period.label}</span>
             <span className="font-medium">
               ${period.rate.toFixed(2)}/kWh
-              {plan.baselineCredit && <span className="text-green-600 text-xs ml-1">(-${plan.baselineCredit.toFixed(2)} credit)</span>}
+              {plan.baselineCredit && (
+                <span className="text-green-600 text-xs ml-1">
+                  (-${plan.baselineCredit.toFixed(2)} credit)
+                </span>
+              )}
             </span>
           </div>
         ))}

@@ -26,7 +26,18 @@ function SeasonCard({
 }: {
   label: string;
   monthRange: string;
-  periods: [string, { rate: number; fees?: number; label: string; hours: { weekday: { start: number; end: number }[]; weekend: { start: number; end: number }[] } }][];
+  periods: [
+    string,
+    {
+      rate: number;
+      fees?: number;
+      label: string;
+      hours: {
+        weekday: { start: number; end: number }[];
+        weekend: { start: number; end: number }[];
+      };
+    },
+  ][];
   baselineCredit?: number;
   variant: "summer" | "winter";
 }) {
@@ -56,7 +67,8 @@ function SeasonCard({
               </p>
               {baselineCredit && (
                 <p className="text-xs text-green-600">
-                  ${(totalRate - baselineCredit).toFixed(2)}/kWh after ${baselineCredit.toFixed(2)} baseline credit
+                  ${(totalRate - baselineCredit).toFixed(2)}/kWh after ${baselineCredit.toFixed(2)}{" "}
+                  baseline credit
                 </p>
               )}
               {(weekdayHours || weekendHours) && (
@@ -74,7 +86,20 @@ function SeasonCard({
   );
 }
 
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function monthRangeLabel(months: number[]): string {
   if (months.length === 0) return "";
@@ -91,9 +116,7 @@ export default function RateScheduleDisplay({ plan }: Props) {
       <div>
         <h3 className="text-xl font-bold">{plan.name}</h3>
         <p className="text-sm text-gray-500">{plan.description}</p>
-        {plan.eligibility && (
-          <p className="text-xs text-amber-600 mt-1">{plan.eligibility}</p>
-        )}
+        {plan.eligibility && <p className="text-xs text-amber-600 mt-1">{plan.eligibility}</p>}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SeasonCard

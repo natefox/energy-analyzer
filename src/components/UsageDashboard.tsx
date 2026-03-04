@@ -40,12 +40,7 @@ export default function UsageDashboard({ result, plugin, selectedPlan, records, 
         selectedPlanId={selectedPlan.id}
         nemTier={nemTier}
       />
-      <UsageAdvice
-        result={result}
-        records={records}
-        plugin={plugin}
-        selectedPlan={selectedPlan}
-      />
+      <UsageAdvice result={result} records={records} plugin={plugin} selectedPlan={selectedPlan} />
       <OptimalSizingGuide
         result={result}
         records={records}
@@ -58,11 +53,7 @@ export default function UsageDashboard({ result, plugin, selectedPlan, records, 
         plugin={plugin}
         selectedPlan={selectedPlan}
       />
-      <BatteryAnalyzer
-        result={result}
-        plugin={plugin}
-        selectedPlan={selectedPlan}
-      />
+      <BatteryAnalyzer result={result} plugin={plugin} selectedPlan={selectedPlan} />
     </div>
   );
 }

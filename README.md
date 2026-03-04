@@ -53,11 +53,13 @@ Upload your utility's CSV export to see exactly how your energy costs break down
 docker run -p 8080:8080 ghcr.io/natefox/energy-analyzer:main
 ```
 
-Open [http://localhost:8080](http://localhost:8080). Or build locally:
+Open [http://localhost:8080](http://localhost:8080). Or use docker compose, which pulls from GHCR by default:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
+
+To build and run a local version instead, edit `docker-compose.yml`: comment out the `image:` line and uncomment `build: .`, then run `docker compose up --build`.
 
 ### Node.js
 
@@ -84,6 +86,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```bash
 npm test
 ```
+
+### Code Formatting
+
+The project uses [Prettier](https://prettier.io/) for consistent code formatting. A pre-commit git hook automatically formats staged files before each commit.
+
+```bash
+# Format all source files
+npm run format
+
+# Check formatting without modifying files
+npm run format:check
+```
+
+The pre-commit hook runs automatically after `npm install` (via the `prepare` script). It formats any staged `.ts`, `.tsx`, `.js`, `.jsx`, `.json`, `.css`, and `.md` files using Prettier before committing.
 
 ### Production Build
 
@@ -162,6 +178,7 @@ npx ts-node scripts/check-rates.ts
 - Recharts
 - Papa Parse
 - Jest
+- Prettier
 
 ## Disclaimer
 
