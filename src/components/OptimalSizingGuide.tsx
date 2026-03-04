@@ -150,6 +150,22 @@ function simulateSystem(
 
 type SortKey = "solarKw" | "batteryKwh" | "systemCost" | "annualSavings" | "paybackYears" | "roi25Year" | "billReductionPct";
 
+function ResultCard({ title, color, r }: { title: string; color: string; r: SizingResult }) {
+  return (
+    <div className={`rounded-lg border ${color} p-4`}>
+      <p className={`text-sm font-semibold mb-2 ${color.replace("border-", "text-").replace("100", "700")}`}>{title}</p>
+      <div className="space-y-1 text-sm">
+        <p><strong>{r.solarKw} kW solar</strong>{r.batteryKwh > 0 ? ` + ${r.batteryKwh} kWh battery` : " (no battery)"}</p>
+        <p>System cost: <strong>{formatCurrency(r.systemCost)}</strong></p>
+        <p>Annual savings: <strong className="text-emerald-600">{formatCurrency(r.annualSavings)}</strong></p>
+        <p>Payback: <strong>{r.paybackYears.toFixed(1)} years</strong></p>
+        <p>25-year ROI: <strong>{r.roi25Year.toFixed(0)}%</strong></p>
+        <p>Bill reduction: <strong>{r.billReductionPct.toFixed(0)}%</strong></p>
+      </div>
+    </div>
+  );
+}
+
 export default function OptimalSizingGuide({ result, records, plugin, selectedPlan }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>("paybackYears");
   const [sortAsc, setSortAsc] = useState(true);
@@ -208,22 +224,6 @@ export default function OptimalSizingGuide({ result, records, plugin, selectedPl
         <p className="text-sm text-gray-500 mt-2">
           Based on your usage data, none of the modeled solar/battery combinations would pay back within 25 years at current rates. This may indicate very low energy usage or already-low rates.
         </p>
-      </div>
-    );
-  }
-
-  function ResultCard({ title, color, r }: { title: string; color: string; r: SizingResult }) {
-    return (
-      <div className={`rounded-lg border ${color} p-4`}>
-        <p className={`text-sm font-semibold mb-2 ${color.replace("border-", "text-").replace("100", "700")}`}>{title}</p>
-        <div className="space-y-1 text-sm">
-          <p><strong>{r.solarKw} kW solar</strong>{r.batteryKwh > 0 ? ` + ${r.batteryKwh} kWh battery` : " (no battery)"}</p>
-          <p>System cost: <strong>{formatCurrency(r.systemCost)}</strong></p>
-          <p>Annual savings: <strong className="text-emerald-600">{formatCurrency(r.annualSavings)}</strong></p>
-          <p>Payback: <strong>{r.paybackYears.toFixed(1)} years</strong></p>
-          <p>25-year ROI: <strong>{r.roi25Year.toFixed(0)}%</strong></p>
-          <p>Bill reduction: <strong>{r.billReductionPct.toFixed(0)}%</strong></p>
-        </div>
       </div>
     );
   }
