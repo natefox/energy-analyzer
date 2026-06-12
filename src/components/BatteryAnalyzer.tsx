@@ -22,6 +22,8 @@ const PRESETS: BatteryPreset[] = [
   { name: "Enphase IQ Battery 5P", capacityKwh: 5, costUsd: 7000, roundTripEfficiency: 0.9 },
   { name: "Enphase IQ Battery 10T", capacityKwh: 10, costUsd: 12000, roundTripEfficiency: 0.9 },
   { name: "Franklin WH aPower", capacityKwh: 13.6, costUsd: 15000, roundTripEfficiency: 0.89 },
+  { name: "Eco-Worthy Cubix100", capacityKwh: 5.12, costUsd: 1080, roundTripEfficiency: 0.92 },
+  { name: "Eco-Worthy PowerMega 314", capacityKwh: 16, costUsd: 2808, roundTripEfficiency: 0.92 },
 ];
 
 export default function BatteryAnalyzer({ result, plugin, selectedPlan }: Props) {
